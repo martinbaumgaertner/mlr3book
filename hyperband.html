@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>3.3 Tuning with Hyperband | mlr3 book</title>
+  <meta name="description" content="3.3 Tuning with Hyperband | mlr3 book" />
+  <meta name="generator" content="bookdown 0.21 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="3.3 Tuning with Hyperband | mlr3 book" />
+  <meta property="og:type" content="book" />
+  <meta property="og:url" content="https://mlr3book.mlr-org.com/" />
+  <meta property="og:image" content="https://mlr3book.mlr-org.com/block.png" />
+  
+  <meta name="github-repo" content="mlr-org/mlr3book" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="3.3 Tuning with Hyperband | mlr3 book" />
+  
+  
+  <meta name="twitter:image" content="https://mlr3book.mlr-org.com/block.png" />
+
+<meta name="author" content="Marc Becker" />
+<meta name="author" content="Martin Binder" />
+<meta name="author" content="Bernd Bischl" />
+<meta name="author" content="Michel Lang" />
+<meta name="author" content="Florian Pfisterer" />
+<meta name="author" content="Nicholas G. Reich" />
+<meta name="author" content="Jakob Richter" />
+<meta name="author" content="Patrick Schratz" />
+<meta name="author" content="Raphael Sonabend" />
+
+
+<meta name="date" content="2020-12-01" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <link rel="apple-touch-icon-precomposed" sizes="180x180" href="apple-touch-icon.png" />
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+<link rel="prev" href="nested-resampling.html"/>
+<link rel="next" href="fs.html"/>
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<script src="libs/accessible-code-block-0.0.1/empty-anchor.js"></script>
+<link href="libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.0/anchor-sections.js"></script>
+
+
+<style type="text/css">
+code.sourceCode > span { display: inline-block; line-height: 1.25; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">mlr3 Manual <img src='https://raw.githubusercontent.com/mlr-org/mlr3/master/man/figures/logo.png' width=30 /></a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Citation Info</a></li>
+<li class="chapter" data-level="" data-path="quickstart.html"><a href="quickstart.html"><i class="fa fa-check"></i>Quickstart</a></li>
+<li class="chapter" data-level="1" data-path="introduction.html"><a href="introduction.html"><i class="fa fa-check"></i><b>1</b> Introduction and Overview</a></li>
+<li class="chapter" data-level="2" data-path="basics.html"><a href="basics.html"><i class="fa fa-check"></i><b>2</b> Basics</a><ul>
+<li class="chapter" data-level="2.1" data-path="r6.html"><a href="r6.html"><i class="fa fa-check"></i><b>2.1</b> Quick R6 Intro for Beginners</a></li>
+<li class="chapter" data-level="2.2" data-path="tasks.html"><a href="tasks.html"><i class="fa fa-check"></i><b>2.2</b> Tasks</a><ul>
+<li class="chapter" data-level="2.2.1" data-path="tasks.html"><a href="tasks.html#tasks-types"><i class="fa fa-check"></i><b>2.2.1</b> Task Types</a></li>
+<li class="chapter" data-level="2.2.2" data-path="tasks.html"><a href="tasks.html#tasks-creation"><i class="fa fa-check"></i><b>2.2.2</b> Task Creation</a></li>
+<li class="chapter" data-level="2.2.3" data-path="tasks.html"><a href="tasks.html#tasks-predefined"><i class="fa fa-check"></i><b>2.2.3</b> Predefined tasks</a></li>
+<li class="chapter" data-level="2.2.4" data-path="tasks.html"><a href="tasks.html#tasks-api"><i class="fa fa-check"></i><b>2.2.4</b> Task API</a><ul>
+<li class="chapter" data-level="2.2.4.1" data-path="tasks.html"><a href="tasks.html#tasks-retrieving"><i class="fa fa-check"></i><b>2.2.4.1</b> Retrieving Data</a></li>
+<li class="chapter" data-level="2.2.4.2" data-path="tasks.html"><a href="tasks.html#tasks-roles"><i class="fa fa-check"></i><b>2.2.4.2</b> Roles (Rows and Columns)</a></li>
+<li class="chapter" data-level="2.2.4.3" data-path="tasks.html"><a href="tasks.html#tasks-mutators"><i class="fa fa-check"></i><b>2.2.4.3</b> Task Mutators</a></li>
+</ul></li>
+<li class="chapter" data-level="2.2.5" data-path="tasks.html"><a href="tasks.html#autoplot-task"><i class="fa fa-check"></i><b>2.2.5</b> Plotting Tasks</a></li>
+</ul></li>
+<li class="chapter" data-level="2.3" data-path="learners.html"><a href="learners.html"><i class="fa fa-check"></i><b>2.3</b> Learners</a><ul>
+<li class="chapter" data-level="2.3.1" data-path="learners.html"><a href="learners.html#learners-predefined"><i class="fa fa-check"></i><b>2.3.1</b> Predefined Learners</a></li>
+</ul></li>
+<li class="chapter" data-level="2.4" data-path="train-predict.html"><a href="train-predict.html"><i class="fa fa-check"></i><b>2.4</b> Train and Predict</a><ul>
+<li class="chapter" data-level="2.4.1" data-path="train-predict.html"><a href="train-predict.html#train-predict-objects"><i class="fa fa-check"></i><b>2.4.1</b> Creating Task and Learner Objects</a></li>
+<li class="chapter" data-level="2.4.2" data-path="train-predict.html"><a href="train-predict.html#split-data"><i class="fa fa-check"></i><b>2.4.2</b> Setting up the train/test splits of the data</a></li>
+<li class="chapter" data-level="2.4.3" data-path="train-predict.html"><a href="train-predict.html#training"><i class="fa fa-check"></i><b>2.4.3</b> Training the learner</a></li>
+<li class="chapter" data-level="2.4.4" data-path="train-predict.html"><a href="train-predict.html#predicting"><i class="fa fa-check"></i><b>2.4.4</b> Predicting</a></li>
+<li class="chapter" data-level="2.4.5" data-path="train-predict.html"><a href="train-predict.html#predict-type"><i class="fa fa-check"></i><b>2.4.5</b> Changing the Predict Type</a></li>
+<li class="chapter" data-level="2.4.6" data-path="train-predict.html"><a href="train-predict.html#autoplot-prediction"><i class="fa fa-check"></i><b>2.4.6</b> Plotting Predictions</a></li>
+<li class="chapter" data-level="2.4.7" data-path="train-predict.html"><a href="train-predict.html#measure"><i class="fa fa-check"></i><b>2.4.7</b> Performance assessment</a></li>
+</ul></li>
+<li class="chapter" data-level="2.5" data-path="resampling.html"><a href="resampling.html"><i class="fa fa-check"></i><b>2.5</b> Resampling</a><ul>
+<li class="chapter" data-level="2.5.1" data-path="resampling.html"><a href="resampling.html#resampling-settings"><i class="fa fa-check"></i><b>2.5.1</b> Settings</a></li>
+<li class="chapter" data-level="2.5.2" data-path="resampling.html"><a href="resampling.html#resampling-inst"><i class="fa fa-check"></i><b>2.5.2</b> Instantiation</a></li>
+<li class="chapter" data-level="2.5.3" data-path="resampling.html"><a href="resampling.html#resampling-exec"><i class="fa fa-check"></i><b>2.5.3</b> Execution</a></li>
+<li class="chapter" data-level="2.5.4" data-path="resampling.html"><a href="resampling.html#resamp-custom"><i class="fa fa-check"></i><b>2.5.4</b> Custom resampling</a></li>
+<li class="chapter" data-level="2.5.5" data-path="resampling.html"><a href="resampling.html#autoplot-resampleresult"><i class="fa fa-check"></i><b>2.5.5</b> Plotting Resample Results</a></li>
+</ul></li>
+<li class="chapter" data-level="2.6" data-path="benchmarking.html"><a href="benchmarking.html"><i class="fa fa-check"></i><b>2.6</b> Benchmarking</a><ul>
+<li class="chapter" data-level="2.6.1" data-path="benchmarking.html"><a href="benchmarking.html#bm-design"><i class="fa fa-check"></i><b>2.6.1</b> Design Creation</a></li>
+<li class="chapter" data-level="2.6.2" data-path="benchmarking.html"><a href="benchmarking.html#bm-exec"><i class="fa fa-check"></i><b>2.6.2</b> Execution and Aggregation of Results</a></li>
+<li class="chapter" data-level="2.6.3" data-path="benchmarking.html"><a href="benchmarking.html#autoplot-benchmarkresult"><i class="fa fa-check"></i><b>2.6.3</b> Plotting Benchmark Results</a></li>
+<li class="chapter" data-level="2.6.4" data-path="benchmarking.html"><a href="benchmarking.html#bm-resamp"><i class="fa fa-check"></i><b>2.6.4</b> Extracting ResampleResults</a></li>
+<li class="chapter" data-level="2.6.5" data-path="benchmarking.html"><a href="benchmarking.html#converting-and-merging-resampleresults"><i class="fa fa-check"></i><b>2.6.5</b> Converting and Merging ResampleResults</a></li>
+</ul></li>
+<li class="chapter" data-level="2.7" data-path="binary-classification.html"><a href="binary-classification.html"><i class="fa fa-check"></i><b>2.7</b> Binary classification</a><ul>
+<li class="chapter" data-level="2.7.1" data-path="binary-classification.html"><a href="binary-classification.html#binary-roc"><i class="fa fa-check"></i><b>2.7.1</b> ROC Curve and Thresholds</a></li>
+<li class="chapter" data-level="2.7.2" data-path="binary-classification.html"><a href="binary-classification.html#threshold-tuning"><i class="fa fa-check"></i><b>2.7.2</b> Threshold Tuning</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="optimization.html"><a href="optimization.html"><i class="fa fa-check"></i><b>3</b> Model Optimization</a><ul>
+<li class="chapter" data-level="3.1" data-path="tuning.html"><a href="tuning.html"><i class="fa fa-check"></i><b>3.1</b> Hyperparameter Tuning</a><ul>
+<li class="chapter" data-level="3.1.1" data-path="tuning.html"><a href="tuning.html#tuning-optimization"><i class="fa fa-check"></i><b>3.1.1</b> The <code>TuningInstance*</code> Classes</a></li>
+<li class="chapter" data-level="3.1.2" data-path="tuning.html"><a href="tuning.html#the-tuner-class"><i class="fa fa-check"></i><b>3.1.2</b> The <code>Tuner</code> Class</a></li>
+<li class="chapter" data-level="3.1.3" data-path="tuning.html"><a href="tuning.html#tuning-triggering"><i class="fa fa-check"></i><b>3.1.3</b> Triggering the Tuning</a></li>
+<li class="chapter" data-level="3.1.4" data-path="tuning.html"><a href="tuning.html#autotuner"><i class="fa fa-check"></i><b>3.1.4</b> Automating the Tuning</a></li>
+</ul></li>
+<li class="chapter" data-level="3.2" data-path="nested-resampling.html"><a href="nested-resampling.html"><i class="fa fa-check"></i><b>3.2</b> Nested Resampling</a><ul>
+<li class="chapter" data-level="3.2.1" data-path="nested-resampling.html"><a href="nested-resampling.html#nested-resamp-exec"><i class="fa fa-check"></i><b>3.2.1</b> Execution</a></li>
+<li class="chapter" data-level="3.2.2" data-path="nested-resampling.html"><a href="nested-resampling.html#nested-resamp-eval"><i class="fa fa-check"></i><b>3.2.2</b> Evaluation</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3" data-path="hyperband.html"><a href="hyperband.html"><i class="fa fa-check"></i><b>3.3</b> Tuning with Hyperband</a></li>
+<li class="chapter" data-level="3.4" data-path="fs.html"><a href="fs.html"><i class="fa fa-check"></i><b>3.4</b> Feature Selection / Filtering</a><ul>
+<li class="chapter" data-level="3.4.1" data-path="fs.html"><a href="fs.html#fs-filter"><i class="fa fa-check"></i><b>3.4.1</b> Filters</a></li>
+<li class="chapter" data-level="3.4.2" data-path="fs.html"><a href="fs.html#fs-calc"><i class="fa fa-check"></i><b>3.4.2</b> Calculating filter values</a></li>
+<li class="chapter" data-level="3.4.3" data-path="fs.html"><a href="fs.html#fs-var-imp-filters"><i class="fa fa-check"></i><b>3.4.3</b> Variable Importance Filters</a></li>
+<li class="chapter" data-level="3.4.4" data-path="fs.html"><a href="fs.html#fs-ensemble"><i class="fa fa-check"></i><b>3.4.4</b> Ensemble Methods</a></li>
+<li class="chapter" data-level="3.4.5" data-path="fs.html"><a href="fs.html#fs-wrapper"><i class="fa fa-check"></i><b>3.4.5</b> Wrapper Methods</a></li>
+<li class="chapter" data-level="3.4.6" data-path="fs.html"><a href="fs.html#fs-wrapper-optimization"><i class="fa fa-check"></i><b>3.4.6</b> The <code>FSelectInstance</code> Classes</a></li>
+<li class="chapter" data-level="3.4.7" data-path="fs.html"><a href="fs.html#the-fselector-class"><i class="fa fa-check"></i><b>3.4.7</b> The <code>FSelector</code> Class</a></li>
+<li class="chapter" data-level="3.4.8" data-path="fs.html"><a href="fs.html#wrapper-selection-triggering"><i class="fa fa-check"></i><b>3.4.8</b> Triggering the Tuning</a></li>
+<li class="chapter" data-level="3.4.9" data-path="fs.html"><a href="fs.html#autofselect"><i class="fa fa-check"></i><b>3.4.9</b> Automating the Feature Selection</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="pipelines.html"><a href="pipelines.html"><i class="fa fa-check"></i><b>4</b> Pipelines</a><ul>
+<li class="chapter" data-level="4.1" data-path="pipe-pipeops.html"><a href="pipe-pipeops.html"><i class="fa fa-check"></i><b>4.1</b> The Building Blocks: PipeOps</a></li>
+<li class="chapter" data-level="4.2" data-path="pipe-operator.html"><a href="pipe-operator.html"><i class="fa fa-check"></i><b>4.2</b> The Pipeline Operator: <code>%&gt;&gt;%</code></a></li>
+<li class="chapter" data-level="4.3" data-path="pipe-nodes-edges-graphs.html"><a href="pipe-nodes-edges-graphs.html"><i class="fa fa-check"></i><b>4.3</b> Nodes, Edges and Graphs</a></li>
+<li class="chapter" data-level="4.4" data-path="pipe-modeling.html"><a href="pipe-modeling.html"><i class="fa fa-check"></i><b>4.4</b> Modeling</a><ul>
+<li class="chapter" data-level="4.4.1" data-path="pipe-modeling.html"><a href="pipe-modeling.html#pipe-hyperpars"><i class="fa fa-check"></i><b>4.4.1</b> Setting Hyperparameters</a></li>
+<li class="chapter" data-level="4.4.2" data-path="pipe-modeling.html"><a href="pipe-modeling.html#pipe-tuning"><i class="fa fa-check"></i><b>4.4.2</b> Tuning</a></li>
+</ul></li>
+<li class="chapter" data-level="4.5" data-path="pipe-nonlinear.html"><a href="pipe-nonlinear.html"><i class="fa fa-check"></i><b>4.5</b> Non-Linear Graphs</a><ul>
+<li class="chapter" data-level="4.5.1" data-path="pipe-nonlinear.html"><a href="pipe-nonlinear.html#pipe-model-ensembles-branching-copying"><i class="fa fa-check"></i><b>4.5.1</b> Branching &amp; Copying</a></li>
+<li class="chapter" data-level="4.5.2" data-path="pipe-nonlinear.html"><a href="pipe-nonlinear.html#pipe-model-ensembles"><i class="fa fa-check"></i><b>4.5.2</b> Model Ensembles</a><ul>
+<li class="chapter" data-level="4.5.2.1" data-path="pipe-nonlinear.html"><a href="pipe-nonlinear.html#pipe-model-ensembles-bagging"><i class="fa fa-check"></i><b>4.5.2.1</b> Bagging</a></li>
+<li class="chapter" data-level="4.5.2.2" data-path="pipe-nonlinear.html"><a href="pipe-nonlinear.html#pipe-model-ensembles-stacking"><i class="fa fa-check"></i><b>4.5.2.2</b> Stacking</a></li>
+<li class="chapter" data-level="4.5.2.3" data-path="pipe-nonlinear.html"><a href="pipe-nonlinear.html#multilevel-stacking"><i class="fa fa-check"></i><b>4.5.2.3</b> Multilevel Stacking</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="4.6" data-path="pipe-special-ops.html"><a href="pipe-special-ops.html"><i class="fa fa-check"></i><b>4.6</b> Special Operators</a><ul>
+<li class="chapter" data-level="4.6.1" data-path="pipe-special-ops.html"><a href="pipe-special-ops.html#imputation-pipeopimpute"><i class="fa fa-check"></i><b>4.6.1</b> Imputation: <code>PipeOpImpute</code></a></li>
+<li class="chapter" data-level="4.6.2" data-path="pipe-special-ops.html"><a href="pipe-special-ops.html#feature-engineering-pipeopmutate"><i class="fa fa-check"></i><b>4.6.2</b> Feature Engineering: <code>PipeOpMutate</code></a></li>
+<li class="chapter" data-level="4.6.3" data-path="pipe-special-ops.html"><a href="pipe-special-ops.html#training-on-data-subsets-pipeopchunk"><i class="fa fa-check"></i><b>4.6.3</b> Training on data subsets: <code>PipeOpChunk</code></a></li>
+<li class="chapter" data-level="4.6.4" data-path="pipe-special-ops.html"><a href="pipe-special-ops.html#feature-selection-pipeopfilter-and-pipeopselect"><i class="fa fa-check"></i><b>4.6.4</b> Feature Selection: <code>PipeOpFilter</code> and <code>PipeOpSelect</code></a></li>
+</ul></li>
+<li class="chapter" data-level="4.7" data-path="in-depth-pipelines.html"><a href="in-depth-pipelines.html"><i class="fa fa-check"></i><b>4.7</b> In-depth look into mlr3pipelines</a><ul>
+<li class="chapter" data-level="4.7.1" data-path="in-depth-pipelines.html"><a href="in-depth-pipelines.html#whats-the-point"><i class="fa fa-check"></i><b>4.7.1</b> What’s the Point</a></li>
+<li class="chapter" data-level="4.7.2" data-path="in-depth-pipelines.html"><a href="in-depth-pipelines.html#pipeop-pipeline-operators"><i class="fa fa-check"></i><b>4.7.2</b> <code>PipeOp</code>: Pipeline Operators</a><ul>
+<li class="chapter" data-level="4.7.2.1" data-path="in-depth-pipelines.html"><a href="in-depth-pipelines.html#why-the-state"><i class="fa fa-check"></i><b>4.7.2.1</b> Why the <code>$state</code></a></li>
+<li class="chapter" data-level="4.7.2.2" data-path="in-depth-pipelines.html"><a href="in-depth-pipelines.html#where-to-get-pipeops"><i class="fa fa-check"></i><b>4.7.2.2</b> Where to Get <code>PipeOp</code>s</a></li>
+</ul></li>
+<li class="chapter" data-level="4.7.3" data-path="in-depth-pipelines.html"><a href="in-depth-pipelines.html#pipeop-channels"><i class="fa fa-check"></i><b>4.7.3</b> PipeOp Channels</a><ul>
+<li class="chapter" data-level="4.7.3.1" data-path="in-depth-pipelines.html"><a href="in-depth-pipelines.html#input-channels"><i class="fa fa-check"></i><b>4.7.3.1</b> Input Channels</a></li>
+<li class="chapter" data-level="4.7.3.2" data-path="in-depth-pipelines.html"><a href="in-depth-pipelines.html#output-channels"><i class="fa fa-check"></i><b>4.7.3.2</b> Output Channels</a></li>
+<li class="chapter" data-level="4.7.3.3" data-path="in-depth-pipelines.html"><a href="in-depth-pipelines.html#channel-configuration"><i class="fa fa-check"></i><b>4.7.3.3</b> Channel Configuration</a></li>
+</ul></li>
+<li class="chapter" data-level="4.7.4" data-path="in-depth-pipelines.html"><a href="in-depth-pipelines.html#graph-networks-of-pipeops"><i class="fa fa-check"></i><b>4.7.4</b> <code>Graph</code>: Networks of <code>PipeOp</code>s</a><ul>
+<li class="chapter" data-level="4.7.4.1" data-path="in-depth-pipelines.html"><a href="in-depth-pipelines.html#basics-1"><i class="fa fa-check"></i><b>4.7.4.1</b> Basics</a></li>
+<li class="chapter" data-level="4.7.4.2" data-path="in-depth-pipelines.html"><a href="in-depth-pipelines.html#networks"><i class="fa fa-check"></i><b>4.7.4.2</b> Networks</a></li>
+<li class="chapter" data-level="4.7.4.3" data-path="in-depth-pipelines.html"><a href="in-depth-pipelines.html#syntactic-sugar"><i class="fa fa-check"></i><b>4.7.4.3</b> Syntactic Sugar</a></li>
+<li class="chapter" data-level="4.7.4.4" data-path="in-depth-pipelines.html"><a href="in-depth-pipelines.html#pipeop-ids-and-id-name-clashes"><i class="fa fa-check"></i><b>4.7.4.4</b> <code>PipeOp</code> IDs and ID Name Clashes</a></li>
+</ul></li>
+<li class="chapter" data-level="4.7.5" data-path="in-depth-pipelines.html"><a href="in-depth-pipelines.html#learners-in-graphs-graphs-in-learners"><i class="fa fa-check"></i><b>4.7.5</b> Learners in Graphs, Graphs in Learners</a><ul>
+<li class="chapter" data-level="4.7.5.1" data-path="in-depth-pipelines.html"><a href="in-depth-pipelines.html#pipeoplearner"><i class="fa fa-check"></i><b>4.7.5.1</b> <code>PipeOpLearner</code></a></li>
+<li class="chapter" data-level="4.7.5.2" data-path="in-depth-pipelines.html"><a href="in-depth-pipelines.html#graphlearner"><i class="fa fa-check"></i><b>4.7.5.2</b> <code>GraphLearner</code></a></li>
+</ul></li>
+<li class="chapter" data-level="4.7.6" data-path="in-depth-pipelines.html"><a href="in-depth-pipelines.html#hyperparameters"><i class="fa fa-check"></i><b>4.7.6</b> Hyperparameters</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="technical.html"><a href="technical.html"><i class="fa fa-check"></i><b>5</b> Technical</a><ul>
+<li class="chapter" data-level="5.1" data-path="parallelization.html"><a href="parallelization.html"><i class="fa fa-check"></i><b>5.1</b> Parallelization</a><ul>
+<li class="chapter" data-level="5.1.1" data-path="parallelization.html"><a href="parallelization.html#nested-resampling-parallelization"><i class="fa fa-check"></i><b>5.1.1</b> Nested Resampling Parallelization</a></li>
+</ul></li>
+<li class="chapter" data-level="5.2" data-path="error-handling.html"><a href="error-handling.html"><i class="fa fa-check"></i><b>5.2</b> Error Handling</a><ul>
+<li class="chapter" data-level="5.2.1" data-path="error-handling.html"><a href="error-handling.html#encapsulation"><i class="fa fa-check"></i><b>5.2.1</b> Encapsulation</a></li>
+<li class="chapter" data-level="5.2.2" data-path="error-handling.html"><a href="error-handling.html#fallback-learners"><i class="fa fa-check"></i><b>5.2.2</b> Fallback learners</a></li>
+</ul></li>
+<li class="chapter" data-level="5.3" data-path="backends.html"><a href="backends.html"><i class="fa fa-check"></i><b>5.3</b> Database Backends</a><ul>
+<li class="chapter" data-level="5.3.1" data-path="backends.html"><a href="backends.html#use-case-nyc-flights"><i class="fa fa-check"></i><b>5.3.1</b> Use Case: NYC Flights</a></li>
+<li class="chapter" data-level="5.3.2" data-path="backends.html"><a href="backends.html#preprocessing-with-dplyr"><i class="fa fa-check"></i><b>5.3.2</b> Preprocessing with <code>dplyr</code></a></li>
+<li class="chapter" data-level="5.3.3" data-path="backends.html"><a href="backends.html#databackenddplyr"><i class="fa fa-check"></i><b>5.3.3</b> DataBackendDplyr</a></li>
+<li class="chapter" data-level="5.3.4" data-path="backends.html"><a href="backends.html#model-fitting"><i class="fa fa-check"></i><b>5.3.4</b> Model fitting</a></li>
+<li class="chapter" data-level="5.3.5" data-path="backends.html"><a href="backends.html#cleanup"><i class="fa fa-check"></i><b>5.3.5</b> Cleanup</a></li>
+</ul></li>
+<li class="chapter" data-level="5.4" data-path="paradox.html"><a href="paradox.html"><i class="fa fa-check"></i><b>5.4</b> Parameters (using <code>paradox</code>)</a><ul>
+<li class="chapter" data-level="5.4.1" data-path="paradox.html"><a href="paradox.html#reference-based-objects"><i class="fa fa-check"></i><b>5.4.1</b> Reference Based Objects</a></li>
+<li class="chapter" data-level="5.4.2" data-path="paradox.html"><a href="paradox.html#defining-a-parameter-space"><i class="fa fa-check"></i><b>5.4.2</b> Defining a Parameter Space</a><ul>
+<li class="chapter" data-level="5.4.2.1" data-path="paradox.html"><a href="paradox.html#single-parameters"><i class="fa fa-check"></i><b>5.4.2.1</b> Single Parameters</a></li>
+<li class="chapter" data-level="5.4.2.2" data-path="paradox.html"><a href="paradox.html#parameter-sets"><i class="fa fa-check"></i><b>5.4.2.2</b> Parameter Sets</a></li>
+<li class="chapter" data-level="5.4.2.3" data-path="paradox.html"><a href="paradox.html#vector-parameters"><i class="fa fa-check"></i><b>5.4.2.3</b> Vector Parameters</a></li>
+</ul></li>
+<li class="chapter" data-level="5.4.3" data-path="paradox.html"><a href="paradox.html#parameter-sampling"><i class="fa fa-check"></i><b>5.4.3</b> Parameter Sampling</a><ul>
+<li class="chapter" data-level="5.4.3.1" data-path="paradox.html"><a href="paradox.html#parameter-designs"><i class="fa fa-check"></i><b>5.4.3.1</b> Parameter Designs</a></li>
+<li class="chapter" data-level="5.4.3.2" data-path="paradox.html"><a href="paradox.html#grid-design"><i class="fa fa-check"></i><b>5.4.3.2</b> Grid Design</a></li>
+<li class="chapter" data-level="5.4.3.3" data-path="paradox.html"><a href="paradox.html#random-sampling"><i class="fa fa-check"></i><b>5.4.3.3</b> Random Sampling</a></li>
+<li class="chapter" data-level="5.4.3.4" data-path="paradox.html"><a href="paradox.html#generalized-sampling-the-sampler-class"><i class="fa fa-check"></i><b>5.4.3.4</b> Generalized Sampling: The <code>Sampler</code> Class</a></li>
+</ul></li>
+<li class="chapter" data-level="5.4.4" data-path="paradox.html"><a href="paradox.html#parameter-transformation"><i class="fa fa-check"></i><b>5.4.4</b> Parameter Transformation</a><ul>
+<li class="chapter" data-level="5.4.4.1" data-path="paradox.html"><a href="paradox.html#transformation-between-types"><i class="fa fa-check"></i><b>5.4.4.1</b> Transformation between Types</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="5.5" data-path="logging.html"><a href="logging.html"><i class="fa fa-check"></i><b>5.5</b> Logging</a><ul>
+<li class="chapter" data-level="5.5.1" data-path="logging.html"><a href="logging.html#changing-mlr3-logging-levels"><i class="fa fa-check"></i><b>5.5.1</b> Changing mlr3 logging levels</a></li>
+<li class="chapter" data-level="5.5.2" data-path="logging.html"><a href="logging.html#redirecting-output"><i class="fa fa-check"></i><b>5.5.2</b> Redirecting output</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="extending.html"><a href="extending.html"><i class="fa fa-check"></i><b>6</b> Extending</a><ul>
+<li class="chapter" data-level="6.1" data-path="extending-learners.html"><a href="extending-learners.html"><i class="fa fa-check"></i><b>6.1</b> Adding new Learners</a><ul>
+<li class="chapter" data-level="6.1.1" data-path="extending-learners.html"><a href="extending-learners.html#create-learner"><i class="fa fa-check"></i><b>6.1.1</b> Calling create_learner</a></li>
+<li class="chapter" data-level="6.1.2" data-path="extending-learners.html"><a href="extending-learners.html#learner_package_type_key.r"><i class="fa fa-check"></i><b>6.1.2</b> learner_package_type_key.R</a></li>
+<li class="chapter" data-level="6.1.3" data-path="extending-learners.html"><a href="extending-learners.html#learner-meta-information"><i class="fa fa-check"></i><b>6.1.3</b> Meta-information</a></li>
+<li class="chapter" data-level="6.1.4" data-path="extending-learners.html"><a href="extending-learners.html#param-set"><i class="fa fa-check"></i><b>6.1.4</b> ParamSet</a></li>
+<li class="chapter" data-level="6.1.5" data-path="extending-learners.html"><a href="extending-learners.html#learner-train"><i class="fa fa-check"></i><b>6.1.5</b> Train function</a></li>
+<li class="chapter" data-level="6.1.6" data-path="extending-learners.html"><a href="extending-learners.html#learner-predict"><i class="fa fa-check"></i><b>6.1.6</b> Predict function</a></li>
+<li class="chapter" data-level="6.1.7" data-path="extending-learners.html"><a href="extending-learners.html#learner-control"><i class="fa fa-check"></i><b>6.1.7</b> Control objects/functions of learners</a></li>
+<li class="chapter" data-level="6.1.8" data-path="extending-learners.html"><a href="extending-learners.html#learner-test"><i class="fa fa-check"></i><b>6.1.8</b> Testing the learner</a><ul>
+<li class="chapter" data-level="6.1.8.1" data-path="extending-learners.html"><a href="extending-learners.html#learner-test-manual"><i class="fa fa-check"></i><b>6.1.8.1</b> Train and Predict</a></li>
+<li class="chapter" data-level="6.1.8.2" data-path="extending-learners.html"><a href="extending-learners.html#learner-test-unit"><i class="fa fa-check"></i><b>6.1.8.2</b> Autotest</a></li>
+<li class="chapter" data-level="6.1.8.3" data-path="extending-learners.html"><a href="extending-learners.html#learner-test-parameter"><i class="fa fa-check"></i><b>6.1.8.3</b> Checking Parameters</a></li>
+</ul></li>
+<li class="chapter" data-level="6.1.9" data-path="extending-learners.html"><a href="extending-learners.html#cleaning"><i class="fa fa-check"></i><b>6.1.9</b> Package Cleaning</a></li>
+<li class="chapter" data-level="6.1.10" data-path="extending-learners.html"><a href="extending-learners.html#thanks-and-maintenance"><i class="fa fa-check"></i><b>6.1.10</b> Thanks and Maintenance</a></li>
+<li class="chapter" data-level="6.1.11" data-path="extending-learners.html"><a href="extending-learners.html#learner-faq"><i class="fa fa-check"></i><b>6.1.11</b> Learner FAQ</a></li>
+</ul></li>
+<li class="chapter" data-level="6.2" data-path="extending-measures.html"><a href="extending-measures.html"><i class="fa fa-check"></i><b>6.2</b> Adding new Measures</a></li>
+<li class="chapter" data-level="6.3" data-path="extending-pipeops.html"><a href="extending-pipeops.html"><i class="fa fa-check"></i><b>6.3</b> Adding new PipeOps</a><ul>
+<li class="chapter" data-level="6.3.1" data-path="extending-pipeops.html"><a href="extending-pipeops.html#ext-pipeopcopy"><i class="fa fa-check"></i><b>6.3.1</b> General Case Example: <code>PipeOpCopy</code></a><ul>
+<li class="chapter" data-level="6.3.1.1" data-path="extending-pipeops.html"><a href="extending-pipeops.html#first-steps-inheriting-from-pipeop"><i class="fa fa-check"></i><b>6.3.1.1</b> First Steps: Inheriting from <code>PipeOp</code></a></li>
+<li class="chapter" data-level="6.3.1.2" data-path="extending-pipeops.html"><a href="extending-pipeops.html#channel-definitions"><i class="fa fa-check"></i><b>6.3.1.2</b> Channel Definitions</a></li>
+<li class="chapter" data-level="6.3.1.3" data-path="extending-pipeops.html"><a href="extending-pipeops.html#train-and-predict"><i class="fa fa-check"></i><b>6.3.1.3</b> Train and Predict</a></li>
+<li class="chapter" data-level="6.3.1.4" data-path="extending-pipeops.html"><a href="extending-pipeops.html#putting-it-together"><i class="fa fa-check"></i><b>6.3.1.4</b> Putting it Together</a></li>
+</ul></li>
+<li class="chapter" data-level="6.3.2" data-path="extending-pipeops.html"><a href="extending-pipeops.html#ext-pipe-preproc"><i class="fa fa-check"></i><b>6.3.2</b> Special Case: Preprocessing</a><ul>
+<li class="chapter" data-level="6.3.2.1" data-path="extending-pipeops.html"><a href="extending-pipeops.html#example-pipeopdropna"><i class="fa fa-check"></i><b>6.3.2.1</b> Example: <code>PipeOpDropNA</code></a></li>
+<li class="chapter" data-level="6.3.2.2" data-path="extending-pipeops.html"><a href="extending-pipeops.html#example-pipeopscalealways"><i class="fa fa-check"></i><b>6.3.2.2</b> Example: <code>PipeOpScaleAlways</code></a></li>
+</ul></li>
+<li class="chapter" data-level="6.3.3" data-path="extending-pipeops.html"><a href="extending-pipeops.html#special-case-preprocessing-with-simple-train"><i class="fa fa-check"></i><b>6.3.3</b> Special Case: Preprocessing with Simple Train</a><ul>
+<li class="chapter" data-level="6.3.3.1" data-path="extending-pipeops.html"><a href="extending-pipeops.html#example-pipeopdropconst"><i class="fa fa-check"></i><b>6.3.3.1</b> Example: <code>PipeOpDropConst</code></a></li>
+<li class="chapter" data-level="6.3.3.2" data-path="extending-pipeops.html"><a href="extending-pipeops.html#example-pipeopscalealwayssimple"><i class="fa fa-check"></i><b>6.3.3.2</b> Example: <code>PipeOpScaleAlwaysSimple</code></a></li>
+</ul></li>
+<li class="chapter" data-level="6.3.4" data-path="extending-pipeops.html"><a href="extending-pipeops.html#ext-pipe-hyperpars"><i class="fa fa-check"></i><b>6.3.4</b> Hyperparameters</a><ul>
+<li class="chapter" data-level="6.3.4.1" data-path="extending-pipeops.html"><a href="extending-pipeops.html#hyperparameter-example-pipeopscale"><i class="fa fa-check"></i><b>6.3.4.1</b> Hyperparameter Example: <code>PipeOpScale</code></a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="special-tasks.html"><a href="special-tasks.html"><i class="fa fa-check"></i><b>7</b> Special Tasks</a><ul>
+<li class="chapter" data-level="7.1" data-path="survival.html"><a href="survival.html"><i class="fa fa-check"></i><b>7.1</b> Survival Analysis</a><ul>
+<li class="chapter" data-level="7.1.1" data-path="survival.html"><a href="survival.html#tasksurv"><i class="fa fa-check"></i><b>7.1.1</b> TaskSurv</a></li>
+<li class="chapter" data-level="7.1.2" data-path="survival.html"><a href="survival.html#predict-types---crank-lp-and-distr"><i class="fa fa-check"></i><b>7.1.2</b> Predict Types - crank, lp, and distr</a></li>
+<li class="chapter" data-level="7.1.3" data-path="survival.html"><a href="survival.html#composition"><i class="fa fa-check"></i><b>7.1.3</b> Composition</a></li>
+<li class="chapter" data-level="7.1.4" data-path="survival.html"><a href="survival.html#benchmark-experiment"><i class="fa fa-check"></i><b>7.1.4</b> Benchmark Experiment</a></li>
+</ul></li>
+<li class="chapter" data-level="7.2" data-path="density.html"><a href="density.html"><i class="fa fa-check"></i><b>7.2</b> Density Estimation</a><ul>
+<li class="chapter" data-level="7.2.1" data-path="density.html"><a href="density.html#train-and-predict-1"><i class="fa fa-check"></i><b>7.2.1</b> Train and Predict</a></li>
+<li class="chapter" data-level="7.2.2" data-path="density.html"><a href="density.html#benchmark-experiment-1"><i class="fa fa-check"></i><b>7.2.2</b> Benchmark Experiment</a></li>
+</ul></li>
+<li class="chapter" data-level="7.3" data-path="spatiotemporal.html"><a href="spatiotemporal.html"><i class="fa fa-check"></i><b>7.3</b> Spatiotemporal Analysis</a><ul>
+<li class="chapter" data-level="7.3.1" data-path="spatiotemporal.html"><a href="spatiotemporal.html#spatiotemporal-intro"><i class="fa fa-check"></i><b>7.3.1</b> Autocorrelation</a></li>
+<li class="chapter" data-level="7.3.2" data-path="spatiotemporal.html"><a href="spatiotemporal.html#sp-vs-nsp-cv"><i class="fa fa-check"></i><b>7.3.2</b> Spatial CV vs. Non-Spatial CV</a><ul>
+<li class="chapter" data-level="7.3.2.1" data-path="spatiotemporal.html"><a href="spatiotemporal.html#nsp-cv"><i class="fa fa-check"></i><b>7.3.2.1</b> Non-Spatial CV</a></li>
+<li class="chapter" data-level="7.3.2.2" data-path="spatiotemporal.html"><a href="spatiotemporal.html#sp-cv"><i class="fa fa-check"></i><b>7.3.2.2</b> Spatial CV</a></li>
+<li class="chapter" data-level="7.3.2.3" data-path="spatiotemporal.html"><a href="spatiotemporal.html#vis-spt-partitions"><i class="fa fa-check"></i><b>7.3.2.3</b> Visualization of Spatiotemporal Partitions</a></li>
+</ul></li>
+<li class="chapter" data-level="7.3.3" data-path="spatiotemporal.html"><a href="spatiotemporal.html#choose-spt-rsmp"><i class="fa fa-check"></i><b>7.3.3</b> Choosing a Resampling Method</a></li>
+</ul></li>
+<li class="chapter" data-level="7.4" data-path="ordinal.html"><a href="ordinal.html"><i class="fa fa-check"></i><b>7.4</b> Ordinal Analysis</a></li>
+<li class="chapter" data-level="7.5" data-path="functional.html"><a href="functional.html"><i class="fa fa-check"></i><b>7.5</b> Functional Analysis</a><ul>
+<li class="chapter" data-level="7.5.1" data-path="functional.html"><a href="functional.html#how-to-model-functional-data"><i class="fa fa-check"></i><b>7.5.1</b> How to model functional data?</a></li>
+</ul></li>
+<li class="chapter" data-level="7.6" data-path="multilabel.html"><a href="multilabel.html"><i class="fa fa-check"></i><b>7.6</b> Multilabel Classification</a></li>
+<li class="chapter" data-level="7.7" data-path="cost-sens.html"><a href="cost-sens.html"><i class="fa fa-check"></i><b>7.7</b> Cost-Sensitive Classification</a><ul>
+<li class="chapter" data-level="7.7.1" data-path="cost-sens.html"><a href="cost-sens.html#a-first-model"><i class="fa fa-check"></i><b>7.7.1</b> A First Model</a></li>
+<li class="chapter" data-level="7.7.2" data-path="cost-sens.html"><a href="cost-sens.html#cost-sensitive-measure"><i class="fa fa-check"></i><b>7.7.2</b> Cost-sensitive Measure</a></li>
+<li class="chapter" data-level="7.7.3" data-path="cost-sens.html"><a href="cost-sens.html#thresholding"><i class="fa fa-check"></i><b>7.7.3</b> Thresholding</a></li>
+<li class="chapter" data-level="7.7.4" data-path="cost-sens.html"><a href="cost-sens.html#threshold-tuning-1"><i class="fa fa-check"></i><b>7.7.4</b> Threshold Tuning</a></li>
+<li class="chapter" data-level="7.7.5" data-path="cost-sens.html"><a href="cost-sens.html#adjusting-thresholds-two-strategies"><i class="fa fa-check"></i><b>7.7.5</b> Adjusting thresholds: Two strategies</a></li>
+<li class="chapter" data-level="7.7.6" data-path="cost-sens.html"><a href="cost-sens.html#pipeopthreshold"><i class="fa fa-check"></i><b>7.7.6</b> PipeOpThreshold</a></li>
+<li class="chapter" data-level="7.7.7" data-path="cost-sens.html"><a href="cost-sens.html#pipeoptunethreshold"><i class="fa fa-check"></i><b>7.7.7</b> PipeOpTunethreshold</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="interpretation.html"><a href="interpretation.html"><i class="fa fa-check"></i><b>8</b> Model Interpretation</a><ul>
+<li class="chapter" data-level="8.1" data-path="iml.html"><a href="iml.html"><i class="fa fa-check"></i><b>8.1</b> IML</a><ul>
+<li class="chapter" data-level="8.1.1" data-path="iml.html"><a href="iml.html#penguin-task"><i class="fa fa-check"></i><b>8.1.1</b> Penguin Task</a></li>
+<li class="chapter" data-level="8.1.2" data-path="iml.html"><a href="iml.html#featureeffects"><i class="fa fa-check"></i><b>8.1.2</b> FeatureEffects</a></li>
+<li class="chapter" data-level="8.1.3" data-path="iml.html"><a href="iml.html#shapley"><i class="fa fa-check"></i><b>8.1.3</b> Shapley</a></li>
+<li class="chapter" data-level="8.1.4" data-path="iml.html"><a href="iml.html#featureimp"><i class="fa fa-check"></i><b>8.1.4</b> FeatureImp</a></li>
+<li class="chapter" data-level="8.1.5" data-path="iml.html"><a href="iml.html#independent-test-data"><i class="fa fa-check"></i><b>8.1.5</b> Independent Test Data</a></li>
+</ul></li>
+<li class="chapter" data-level="8.2" data-path="dalex.html"><a href="dalex.html"><i class="fa fa-check"></i><b>8.2</b> DALEX</a><ul>
+<li class="chapter" data-level="8.2.1" data-path="dalex.html"><a href="dalex.html#interpretability-dalex-introduction"><i class="fa fa-check"></i><b>8.2.1</b> Introduction</a></li>
+<li class="chapter" data-level="8.2.2" data-path="dalex.html"><a href="dalex.html#interpretability-data-fifa"><i class="fa fa-check"></i><b>8.2.2</b> Read data: FIFA</a></li>
+<li class="chapter" data-level="8.2.3" data-path="dalex.html"><a href="dalex.html#interpretability-train-ranger"><i class="fa fa-check"></i><b>8.2.3</b> Train a model: Ranger</a></li>
+<li class="chapter" data-level="8.2.4" data-path="dalex.html"><a href="dalex.html#interpretability-architecture"><i class="fa fa-check"></i><b>8.2.4</b> The general workflow</a></li>
+<li class="chapter" data-level="8.2.5" data-path="dalex.html"><a href="dalex.html#interpretability-dataset-level"><i class="fa fa-check"></i><b>8.2.5</b> Dataset level exploration</a></li>
+<li class="chapter" data-level="8.2.6" data-path="dalex.html"><a href="dalex.html#interpretability-instance-level"><i class="fa fa-check"></i><b>8.2.6</b> Instance level explanation</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="appendix.html"><a href="appendix.html"><i class="fa fa-check"></i><b>9</b> Appendix</a><ul>
+<li class="chapter" data-level="9.1" data-path="list-learners.html"><a href="list-learners.html"><i class="fa fa-check"></i><b>9.1</b> Integrated Learners</a></li>
+<li class="chapter" data-level="9.2" data-path="list-measures.html"><a href="list-measures.html"><i class="fa fa-check"></i><b>9.2</b> Integrated Performance Measures</a></li>
+<li class="chapter" data-level="9.3" data-path="list-filters.html"><a href="list-filters.html"><i class="fa fa-check"></i><b>9.3</b> Integrated Filter Methods</a><ul>
+<li class="chapter" data-level="9.3.1" data-path="list-filters.html"><a href="list-filters.html#fs-filter-list"><i class="fa fa-check"></i><b>9.3.1</b> Standalone filter methods</a></li>
+<li class="chapter" data-level="9.3.2" data-path="list-filters.html"><a href="list-filters.html#fs-filter-embedded-list"><i class="fa fa-check"></i><b>9.3.2</b> Learners With Embedded Filter Methods</a></li>
+</ul></li>
+<li class="chapter" data-level="9.4" data-path="list-pipeops.html"><a href="list-pipeops.html"><i class="fa fa-check"></i><b>9.4</b> Integrated Pipe Operators</a></li>
+<li class="chapter" data-level="9.5" data-path="compare-frameworks.html"><a href="compare-frameworks.html"><i class="fa fa-check"></i><b>9.5</b> Framework Comparison</a><ul>
+<li class="chapter" data-level="9.5.1" data-path="compare-frameworks.html"><a href="compare-frameworks.html#an-introduction-to-pipeops"><i class="fa fa-check"></i><b>9.5.1</b> An introduction to “PipeOp”s</a><ul>
+<li class="chapter" data-level="9.5.1.1" data-path="compare-frameworks.html"><a href="compare-frameworks.html#a-quick-glance-into-a-pipeop"><i class="fa fa-check"></i><b>9.5.1.1</b> A quick glance into a PipeOp</a></li>
+<li class="chapter" data-level="9.5.1.2" data-path="compare-frameworks.html"><a href="compare-frameworks.html#constructing-the-pipeline"><i class="fa fa-check"></i><b>9.5.1.2</b> Constructing the Pipeline</a></li>
+</ul></li>
+<li class="chapter" data-level="9.5.2" data-path="compare-frameworks.html"><a href="compare-frameworks.html#mlr3pipelines-vs.-mlr"><i class="fa fa-check"></i><b>9.5.2</b> mlr3pipelines vs. mlr</a><ul>
+<li class="chapter" data-level="9.5.2.1" data-path="compare-frameworks.html"><a href="compare-frameworks.html#mlr"><i class="fa fa-check"></i><b>9.5.2.1</b> mlr</a></li>
+<li class="chapter" data-level="9.5.2.2" data-path="compare-frameworks.html"><a href="compare-frameworks.html#mlr3pipelines"><i class="fa fa-check"></i><b>9.5.2.2</b> mlr3pipelines</a></li>
+</ul></li>
+<li class="chapter" data-level="9.5.3" data-path="compare-frameworks.html"><a href="compare-frameworks.html#mlr3pipelines-vs.-sklearn.pipeline.pipeline"><i class="fa fa-check"></i><b>9.5.3</b> mlr3pipelines vs. sklearn.pipeline.Pipeline</a><ul>
+<li class="chapter" data-level="9.5.3.1" data-path="compare-frameworks.html"><a href="compare-frameworks.html#sklearn"><i class="fa fa-check"></i><b>9.5.3.1</b> sklearn</a></li>
+<li class="chapter" data-level="9.5.3.2" data-path="compare-frameworks.html"><a href="compare-frameworks.html#mlr3pipelines-1"><i class="fa fa-check"></i><b>9.5.3.2</b> mlr3pipelines</a></li>
+</ul></li>
+<li class="chapter" data-level="9.5.4" data-path="compare-frameworks.html"><a href="compare-frameworks.html#mlr3pipelines-vs-recipes"><i class="fa fa-check"></i><b>9.5.4</b> mlr3pipelines vs recipes</a><ul>
+<li class="chapter" data-level="9.5.4.1" data-path="compare-frameworks.html"><a href="compare-frameworks.html#recipes"><i class="fa fa-check"></i><b>9.5.4.1</b> recipes</a></li>
+<li class="chapter" data-level="9.5.4.2" data-path="compare-frameworks.html"><a href="compare-frameworks.html#mlr3pipelines-2"><i class="fa fa-check"></i><b>9.5.4.2</b> mlr3pipelines</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">mlr3 book</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="hyperband" class="section level2">
+<h2><span class="header-section-number">3.3</span> Tuning with Hyperband</h2>
+<p>Besides the more traditional tuning methods, the ecosystem around <a href="https://mlr3.mlr-org.com">mlr3</a> offers another procedure for hyperparameter optimization called Hyperband implemented in the <a href="https://mlr3hyperband.mlr-org.com">mlr3hyperband</a> package.
+Hyperband is a budget-oriented procedure, weeding out suboptimal performing configurations early on during a partially sequential training process, increasing tuning efficiency as a consequence.
+For this, a combination of incremental resource allocation and early stopping is used: As optimization progresses, computational resources are increased for more promising configurations, while less promising ones are terminated early.
+To give an introductory analogy, imagine two horse trainers are given eight untrained horses.
+Both trainers want to win the upcoming race, but they are only given 32 units of food.
+Given that each horse can be fed up to 8 units food (“maximum budget” per horse), there is not enough food for all the horses.
+It is critical to identify the most promising horses early, and give them enough food to improve.
+So, the trainers need to develop a strategy to split up the food in the best possible way.
+The first trainer is very optimistic and wants to explore the full capabilities of a horse, because he does not want to pass a judgment on a horse’s performance unless it has been fully trained.
+So, he divides his budget by the maximum amount he can give to a horse (lets say eight, so <span class="math inline">\(32 / 8 = 4\)</span>) and randomly picks four horses - his budget simply is not enough to fully train more.
+Those four horses are then trained to their full capabilities, while the rest is set free.
+This way, the trainer is confident about choosing the best out of the four trained horses, but he might have overlooked the horse with the highest potential since he only focused on half of them.
+The other trainer is more creative and develops a different strategy.
+He thinks, if a horse is not performing well at the beginning, it will also not improve after further training.
+Based on this assumption, he decides to give one unit of food to each horse and observes how they develop.
+After the initial food is consumed, he checks their performance and kicks the slowest half out of his training regime.
+Then, he increases the available food for the remaining, further trains them until the food is consumed again, only to kick out the worst half once more.
+He repeats this until the one remaining horse gets the rest of the food.
+This means only one horse is fully trained, but on the flip side, he was able to start training with all eight horses.
+On race day, all the horses are put on the starting line.
+But which trainer will have the winning horse?
+The one, who tried to train a maximum amount of horses to their fullest?
+Or the other one, who made assumptions about the training progress of his horses?
+How the training phases may possibly look like is visualized in figure <a href="hyperband.html#fig:03-optimization-hyperband-001">3.1</a>.</p>
+<div class="figure" style="text-align: center"><span id="fig:03-optimization-hyperband-001"></span>
+<img src="images/horse_training1.png" alt="Visulization of how the training processes may look like. The left plot corresponds to the non-selective trainer, while the right one to the selective trainer." width="99%" />
+<p class="caption">
+Figure 3.1: Visulization of how the training processes may look like. The left plot corresponds to the non-selective trainer, while the right one to the selective trainer.
+</p>
+</div>
+<p>Hyperband works very similar in some ways, but also different in others.
+It is not embodied by one of the trainers in our analogy, but more by the person, who would pay them.
+Hyperband consists of several brackets, each bracket corresponding to a trainer, and we do not care about horses but about hyperparameter configurations of a machine learning algorithm.
+The budget is not in terms of food, but in terms of a hyperparameter of the learner that scales in some way with the computational effort.
+An example is the number of epochs we train a neural network, or the number of iterations in boosting.
+Furthermore, there are not only two brackets (or trainers), but several, each placed at a unique spot between fully explorative of later training stages and extremely selective, equal to higher exploration of early training stages.
+The level of selection aggressiveness is handled by a user-defined parameter called <span class="math inline">\(\eta\)</span>.
+So, <span class="math inline">\(1/\eta\)</span> is the fraction of remaining configurations after a bracket removes his worst performing ones, but <span class="math inline">\(\eta\)</span> is also the factor by that the budget is increased for the next stage.
+Because there is a different maximum budget per configuration that makes sense in different scenarios, the user also has to set this as the <span class="math inline">\(R\)</span> parameter.
+No further parameters are required for Hyperband – the full required budget across all brackets is indirectly given by <span class="math display">\[(\lfloor \log_{\eta}{R} \rfloor + 1)^2 * R\]</span> <span class="citation">(Li et al. <a href="#ref-Li2016" role="doc-biblioref">2016</a>)</span>.
+To give an idea how a full bracket layout might look like for a specific <span class="math inline">\(R\)</span> and <span class="math inline">\(\eta\)</span>, a quick overview is given in the following table.</p>
+<table class="kable_wrapper">
+<caption>
+<span id="tab:03-optimization-hyperband-002">Table 3.1: </span>Hyperband layout for <span class="math inline">\(\eta = 2\)</span> and <span class="math inline">\(R = 8\)</span>, consisting of four brackets with <span class="math inline">\(n\)</span> as the amount of active configurations.
+</caption>
+<tbody>
+<tr>
+<td>
+<table>
+<thead>
+<tr class="header">
+<th align="right">stage</th>
+<th align="right">budget</th>
+<th align="right">n</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">8</td>
+</tr>
+<tr class="even">
+<td align="right">2</td>
+<td align="right">2</td>
+<td align="right">4</td>
+</tr>
+<tr class="odd">
+<td align="right">3</td>
+<td align="right">4</td>
+<td align="right">2</td>
+</tr>
+<tr class="even">
+<td align="right">4</td>
+<td align="right">8</td>
+<td align="right">1</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td>
+<table>
+<thead>
+<tr class="header">
+<th align="right">stage</th>
+<th align="right">budget</th>
+<th align="right">n</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">1</td>
+<td align="right">2</td>
+<td align="right">6</td>
+</tr>
+<tr class="even">
+<td align="right">2</td>
+<td align="right">4</td>
+<td align="right">3</td>
+</tr>
+<tr class="odd">
+<td align="right">3</td>
+<td align="right">8</td>
+<td align="right">1</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td>
+<table>
+<thead>
+<tr class="header">
+<th align="right">stage</th>
+<th align="right">budget</th>
+<th align="right">n</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">1</td>
+<td align="right">4</td>
+<td align="right">4</td>
+</tr>
+<tr class="even">
+<td align="right">2</td>
+<td align="right">8</td>
+<td align="right">2</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td>
+<table>
+<thead>
+<tr class="header">
+<th align="right">stage</th>
+<th align="right">budget</th>
+<th align="right">n</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">1</td>
+<td align="right">8</td>
+<td align="right">4</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Of course, early termination based on a performance criterion may be disadvantageous if it is done too aggressively in certain scenarios.
+A learner to jumping radically in its estimated performance during the training phase may get the best configurations canceled too early, simply because they do not improve quickly enough compared to others.
+In other words, it is often unclear beforehand if having an high amount of configurations <span class="math inline">\(n\)</span>, that gets aggressively discarded early, is better than having a high budget <span class="math inline">\(B\)</span> per configuration.
+The arising tradeoff, that has to be made, is called the “<span class="math inline">\(n\)</span> versus <span class="math inline">\(B/n\)</span> problem”.
+To create a balance between selection based on early training performance versus exploration of training performances in later training stages, <span class="math inline">\(\lfloor \log_{\eta}{R} \rfloor + 1\)</span> brackets are constructed with an associated set of varying sized configurations.
+Thus, some brackets contain more configurations, with a small initial budget.
+In these, a lot are discarded after having been trained for only a short amount of time, corresponding to the selective trainer in our horse analogy.
+Others are constructed with fewer configurations, where discarding only takes place after a significant amount of budget was consumed.
+The last bracket usually never discards anything, but also starts with only very few configurations – this is equivalent to the trainer explorative of later stages.
+The former corresponds high <span class="math inline">\(n\)</span>, while the latter high <span class="math inline">\(B/n\)</span>.
+Even though different brackets are initialized with a different amount of configurations and different initial budget sizes, each bracket is assigned (approximately) the same budget <span class="math inline">\((\lfloor \log_{\eta}{R} \rfloor + 1) * R\)</span>.</p>
+<p>The configurations at the start of each bracket are initialized by random, often uniform sampling.
+Note that currently all configurations are trained completely from the beginning, so no online updates of models from stage to stage is happening.</p>
+<p>To identify the budget for evaluating Hyperband, the user has to specify explicitly which hyperparameter of the learner influences the budget by extending a single hyperparameter in the <a href="https://paradox.mlr-org.com/reference/ParamSet.html"><code>ParamSet</code></a> with an argument (<code>tags = "budget"</code>), like in the following snippet:</p>
+<div class="sourceCode" id="cb215"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb215-1"><a href="hyperband.html#cb215-1"></a><span class="kw">library</span>(paradox)</span>
+<span id="cb215-2"><a href="hyperband.html#cb215-2"></a></span>
+<span id="cb215-3"><a href="hyperband.html#cb215-3"></a><span class="co"># Hyperparameter subset of XGBoost</span></span>
+<span id="cb215-4"><a href="hyperband.html#cb215-4"></a>search_space =<span class="st"> </span>ParamSet<span class="op">$</span><span class="kw">new</span>(<span class="kw">list</span>(</span>
+<span id="cb215-5"><a href="hyperband.html#cb215-5"></a>  ParamInt<span class="op">$</span><span class="kw">new</span>(<span class="st">&quot;nrounds&quot;</span>, <span class="dt">lower =</span> <span class="dv">1</span>, <span class="dt">upper =</span> <span class="dv">16</span>, <span class="dt">tags =</span> <span class="st">&quot;budget&quot;</span>),</span>
+<span id="cb215-6"><a href="hyperband.html#cb215-6"></a>  ParamFct<span class="op">$</span><span class="kw">new</span>(<span class="st">&quot;booster&quot;</span>, <span class="dt">levels =</span> <span class="kw">c</span>(<span class="st">&quot;gbtree&quot;</span>, <span class="st">&quot;gblinear&quot;</span>, <span class="st">&quot;dart&quot;</span>))</span>
+<span id="cb215-7"><a href="hyperband.html#cb215-7"></a>))</span></code></pre></div>
+<p>Thanks to the broad ecosystem of the <a href="https://mlr3verse.mlr-org.com">mlr3verse</a> a learner does not require a natural budget parameter.
+A typical case of this would be decision trees.
+By using subsampling as preprocessing with <a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a>, we can work around a lacking budget parameter.</p>
+<div class="sourceCode" id="cb216"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb216-1"><a href="hyperband.html#cb216-1"></a><span class="kw">library</span>(mlr3tuning)</span>
+<span id="cb216-2"><a href="hyperband.html#cb216-2"></a><span class="kw">library</span>(mlr3hyperband)</span>
+<span id="cb216-3"><a href="hyperband.html#cb216-3"></a><span class="kw">library</span>(mlr3pipelines)</span>
+<span id="cb216-4"><a href="hyperband.html#cb216-4"></a><span class="kw">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb216-5"><a href="hyperband.html#cb216-5"></a></span>
+<span id="cb216-6"><a href="hyperband.html#cb216-6"></a><span class="co"># extend &quot;classif.rpart&quot; with &quot;subsampling&quot; as preprocessing step</span></span>
+<span id="cb216-7"><a href="hyperband.html#cb216-7"></a>ll =<span class="st"> </span><span class="kw">po</span>(<span class="st">&quot;subsample&quot;</span>) <span class="op">%&gt;&gt;%</span><span class="st"> </span><span class="kw">lrn</span>(<span class="st">&quot;classif.rpart&quot;</span>)</span>
+<span id="cb216-8"><a href="hyperband.html#cb216-8"></a></span>
+<span id="cb216-9"><a href="hyperband.html#cb216-9"></a><span class="co"># extend hyperparameters of &quot;classif.rpart&quot; with subsampling fraction as budget</span></span>
+<span id="cb216-10"><a href="hyperband.html#cb216-10"></a>search_space =<span class="st"> </span>ParamSet<span class="op">$</span><span class="kw">new</span>(<span class="kw">list</span>(</span>
+<span id="cb216-11"><a href="hyperband.html#cb216-11"></a>  ParamDbl<span class="op">$</span><span class="kw">new</span>(<span class="st">&quot;classif.rpart.cp&quot;</span>, <span class="dt">lower =</span> <span class="fl">0.001</span>, <span class="dt">upper =</span> <span class="fl">0.1</span>),</span>
+<span id="cb216-12"><a href="hyperband.html#cb216-12"></a>  ParamInt<span class="op">$</span><span class="kw">new</span>(<span class="st">&quot;classif.rpart.minsplit&quot;</span>, <span class="dt">lower =</span> <span class="dv">1</span>, <span class="dt">upper =</span> <span class="dv">10</span>),</span>
+<span id="cb216-13"><a href="hyperband.html#cb216-13"></a>  ParamDbl<span class="op">$</span><span class="kw">new</span>(<span class="st">&quot;subsample.frac&quot;</span>, <span class="dt">lower =</span> <span class="fl">0.1</span>, <span class="dt">upper =</span> <span class="dv">1</span>, <span class="dt">tags =</span> <span class="st">&quot;budget&quot;</span>)</span>
+<span id="cb216-14"><a href="hyperband.html#cb216-14"></a>))</span></code></pre></div>
+<p>We can now plug the new learner with the extended hyperparameter set into a <a href="https://mlr3tuning.mlr-org.com/reference/TuningInstanceSingleCrit.html"><code>TuningInstanceSingleCrit</code></a> the same way as usual.
+Naturally, Hyperband terminates once all of its brackets are evaluated, so a <a href="https://bbotk.mlr-org.com/reference/Terminator.html"><code>Terminator</code></a> in the tuning instance acts as an upper bound and should be only set to a low value if one is unsure of how long Hyperband will take to finish under the given settings.</p>
+<div class="sourceCode" id="cb217"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb217-1"><a href="hyperband.html#cb217-1"></a>instance =<span class="st"> </span>TuningInstanceSingleCrit<span class="op">$</span><span class="kw">new</span>(</span>
+<span id="cb217-2"><a href="hyperband.html#cb217-2"></a>  <span class="dt">task =</span> <span class="kw">tsk</span>(<span class="st">&quot;iris&quot;</span>), </span>
+<span id="cb217-3"><a href="hyperband.html#cb217-3"></a>  <span class="dt">learner =</span> ll, </span>
+<span id="cb217-4"><a href="hyperband.html#cb217-4"></a>  <span class="dt">resampling =</span> <span class="kw">rsmp</span>(<span class="st">&quot;holdout&quot;</span>), </span>
+<span id="cb217-5"><a href="hyperband.html#cb217-5"></a>  <span class="dt">measure =</span> <span class="kw">msr</span>(<span class="st">&quot;classif.ce&quot;</span>), </span>
+<span id="cb217-6"><a href="hyperband.html#cb217-6"></a>  <span class="dt">terminator =</span> <span class="kw">trm</span>(<span class="st">&quot;none&quot;</span>), <span class="co"># hyperband terminates itself</span></span>
+<span id="cb217-7"><a href="hyperband.html#cb217-7"></a>  <span class="dt">search_space =</span> search_space</span>
+<span id="cb217-8"><a href="hyperband.html#cb217-8"></a>)</span></code></pre></div>
+<p>Now, we initialize a new instance of the <a href="https://www.rdocumentation.org/packages/mlr3hyperband/topics/TunerHyperband"><code>mlr3hyperband::TunerHyperband</code></a> class and start tuning with it.</p>
+<div class="sourceCode" id="cb218"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb218-1"><a href="hyperband.html#cb218-1"></a>tuner =<span class="st"> </span><span class="kw">tnr</span>(<span class="st">&quot;hyperband&quot;</span>, <span class="dt">eta =</span> <span class="dv">3</span>)</span>
+<span id="cb218-2"><a href="hyperband.html#cb218-2"></a>tuner<span class="op">$</span><span class="kw">optimize</span>(instance)</span></code></pre></div>
+<pre><code>## INFO  [10:44:47.671] Starting to optimize 3 parameter(s) with &#39;&lt;TunerHyperband&gt;&#39; and &#39;&lt;TerminatorNone&gt;&#39; 
+## INFO  [10:44:47.720] Amount of brackets to be evaluated = 3,  
+## INFO  [10:44:47.732] Start evaluation of bracket 1 
+## INFO  [10:44:47.739] Training 9 configs with budget of 0.111111 for each 
+## INFO  [10:44:47.743] Evaluating 9 configuration(s) 
+## INFO  [10:44:49.241] Result of batch 1: 
+## INFO  [10:44:49.246]  classif.rpart.cp classif.rpart.minsplit subsample.frac bracket bracket_stage 
+## INFO  [10:44:49.246]           0.02533                      3         0.1111       2             0 
+## INFO  [10:44:49.246]           0.07348                      5         0.1111       2             0 
+## INFO  [10:44:49.246]           0.08490                      3         0.1111       2             0 
+## INFO  [10:44:49.246]           0.05026                      6         0.1111       2             0 
+## INFO  [10:44:49.246]           0.03940                      4         0.1111       2             0 
+## INFO  [10:44:49.246]           0.02540                      7         0.1111       2             0 
+## INFO  [10:44:49.246]           0.01200                      4         0.1111       2             0 
+## INFO  [10:44:49.246]           0.03961                      4         0.1111       2             0 
+## INFO  [10:44:49.246]           0.05762                      6         0.1111       2             0 
+## INFO  [10:44:49.246]  budget_scaled budget_real n_configs classif.ce 
+## INFO  [10:44:49.246]          1.111      0.1111         9       0.06 
+## INFO  [10:44:49.246]          1.111      0.1111         9       0.08 
+## INFO  [10:44:49.246]          1.111      0.1111         9       0.02 
+## INFO  [10:44:49.246]          1.111      0.1111         9       0.02 
+## INFO  [10:44:49.246]          1.111      0.1111         9       0.08 
+## INFO  [10:44:49.246]          1.111      0.1111         9       0.02 
+## INFO  [10:44:49.246]          1.111      0.1111         9       0.10 
+## INFO  [10:44:49.246]          1.111      0.1111         9       0.14 
+## INFO  [10:44:49.246]          1.111      0.1111         9       0.04 
+## INFO  [10:44:49.246]                                 uhash 
+## INFO  [10:44:49.246]  d8ca5704-89e1-4e58-88ec-7ce3af2bfe9e 
+## INFO  [10:44:49.246]  82bf0ed8-2dcc-4921-84e9-45c03dfe87a6 
+## INFO  [10:44:49.246]  ebff6b71-b2bd-4b51-9bc0-b53aa117ac83 
+## INFO  [10:44:49.246]  3f5dc784-0bb2-44bd-8fd8-1a8a31447c43 
+## INFO  [10:44:49.246]  583ad782-7dcd-472f-aeb7-68f7767b37d3 
+## INFO  [10:44:49.246]  92725c47-6fec-49cd-859b-3ad55ab1cbf2 
+## INFO  [10:44:49.246]  9d310641-b331-46f1-8949-a6bc0297e922 
+## INFO  [10:44:49.246]  6e941eec-21f2-462a-a000-f888c553f79c 
+## INFO  [10:44:49.246]  e6a7e71c-6d9e-4bb9-af6e-a4269bf28469 
+## INFO  [10:44:49.247] Training 3 configs with budget of 0.333333 for each 
+## INFO  [10:44:49.251] Evaluating 3 configuration(s) 
+## INFO  [10:44:49.739] Result of batch 2: 
+## INFO  [10:44:49.742]  classif.rpart.cp classif.rpart.minsplit subsample.frac bracket bracket_stage 
+## INFO  [10:44:49.742]           0.08490                      3         0.3333       2             1 
+## INFO  [10:44:49.742]           0.05026                      6         0.3333       2             1 
+## INFO  [10:44:49.742]           0.02540                      7         0.3333       2             1 
+## INFO  [10:44:49.742]  budget_scaled budget_real n_configs classif.ce 
+## INFO  [10:44:49.742]          3.333      0.3333         3       0.02 
+## INFO  [10:44:49.742]          3.333      0.3333         3       0.04 
+## INFO  [10:44:49.742]          3.333      0.3333         3       0.06 
+## INFO  [10:44:49.742]                                 uhash 
+## INFO  [10:44:49.742]  b69c317d-fed4-48e5-9270-2f695a838b3e 
+## INFO  [10:44:49.742]  ebf1a0f4-00d3-415d-aaea-75b00a70c2bc 
+## INFO  [10:44:49.742]  d4d89cb8-e72e-418c-89cd-12cc5b974534 
+## INFO  [10:44:49.744] Training 1 configs with budget of 1 for each 
+## INFO  [10:44:49.747] Evaluating 1 configuration(s) 
+## INFO  [10:44:49.956] Result of batch 3: 
+## INFO  [10:44:49.959]  classif.rpart.cp classif.rpart.minsplit subsample.frac bracket bracket_stage 
+## INFO  [10:44:49.959]            0.0849                      3              1       2             2 
+## INFO  [10:44:49.959]  budget_scaled budget_real n_configs classif.ce 
+## INFO  [10:44:49.959]             10           1         1       0.04 
+## INFO  [10:44:49.959]                                 uhash 
+## INFO  [10:44:49.959]  3c347f5e-842d-408f-8b0b-8920fb38942e 
+## INFO  [10:44:49.960] Start evaluation of bracket 2 
+## INFO  [10:44:49.964] Training 5 configs with budget of 0.333333 for each 
+## INFO  [10:44:49.967] Evaluating 5 configuration(s) 
+## INFO  [10:44:50.726] Result of batch 4: 
+## INFO  [10:44:50.729]  classif.rpart.cp classif.rpart.minsplit subsample.frac bracket bracket_stage 
+## INFO  [10:44:50.729]           0.08650                      6         0.3333       1             0 
+## INFO  [10:44:50.729]           0.07491                      9         0.3333       1             0 
+## INFO  [10:44:50.729]           0.06716                      6         0.3333       1             0 
+## INFO  [10:44:50.729]           0.06218                      9         0.3333       1             0 
+## INFO  [10:44:50.729]           0.03785                      4         0.3333       1             0 
+## INFO  [10:44:50.729]  budget_scaled budget_real n_configs classif.ce 
+## INFO  [10:44:50.729]          3.333      0.3333         5       0.04 
+## INFO  [10:44:50.729]          3.333      0.3333         5       0.04 
+## INFO  [10:44:50.729]          3.333      0.3333         5       0.08 
+## INFO  [10:44:50.729]          3.333      0.3333         5       0.04 
+## INFO  [10:44:50.729]          3.333      0.3333         5       0.02 
+## INFO  [10:44:50.729]                                 uhash 
+## INFO  [10:44:50.729]  2fc5b191-4f7d-43d8-a9ef-8ce0fb62a0af 
+## INFO  [10:44:50.729]  e3409bef-2c7f-44b3-a4c6-5b0f2750abff 
+## INFO  [10:44:50.729]  f275beba-c6af-4f48-8f06-d347eeaf402f 
+## INFO  [10:44:50.729]  643edba5-dd10-4abe-9feb-f0b819d66a03 
+## INFO  [10:44:50.729]  3638a6d5-6f6f-4cf7-acca-b8df93413a07 
+## INFO  [10:44:50.730] Training 1 configs with budget of 1 for each 
+## INFO  [10:44:50.734] Evaluating 1 configuration(s) 
+## INFO  [10:44:50.939] Result of batch 5: 
+## INFO  [10:44:50.942]  classif.rpart.cp classif.rpart.minsplit subsample.frac bracket bracket_stage 
+## INFO  [10:44:50.942]           0.03785                      4              1       1             1 
+## INFO  [10:44:50.942]  budget_scaled budget_real n_configs classif.ce 
+## INFO  [10:44:50.942]             10           1         1       0.04 
+## INFO  [10:44:50.942]                                 uhash 
+## INFO  [10:44:50.942]  803cb496-b0f5-4c45-8dcd-cbc02e282aef 
+## INFO  [10:44:50.944] Start evaluation of bracket 3 
+## INFO  [10:44:50.948] Training 3 configs with budget of 1 for each 
+## INFO  [10:44:50.951] Evaluating 3 configuration(s) 
+## INFO  [10:44:51.453] Result of batch 6: 
+## INFO  [10:44:51.456]  classif.rpart.cp classif.rpart.minsplit subsample.frac bracket bracket_stage 
+## INFO  [10:44:51.456]           0.02724                     10              1       0             0 
+## INFO  [10:44:51.456]           0.05689                      3              1       0             0 
+## INFO  [10:44:51.456]           0.09141                      4              1       0             0 
+## INFO  [10:44:51.456]  budget_scaled budget_real n_configs classif.ce 
+## INFO  [10:44:51.456]             10           1         3       0.04 
+## INFO  [10:44:51.456]             10           1         3       0.04 
+## INFO  [10:44:51.456]             10           1         3       0.04 
+## INFO  [10:44:51.456]                                 uhash 
+## INFO  [10:44:51.456]  fff7dccc-073a-4698-89d5-4c235fee5cc0 
+## INFO  [10:44:51.456]  55240f6a-03a9-4db0-be0b-53ae2a5026fb 
+## INFO  [10:44:51.456]  bcc94b00-fcf0-4bee-8357-e421f8d4cac2 
+## INFO  [10:44:51.474] Finished optimizing after 22 evaluation(s) 
+## INFO  [10:44:51.475] Result: 
+## INFO  [10:44:51.477]  classif.rpart.cp classif.rpart.minsplit subsample.frac learner_param_vals 
+## INFO  [10:44:51.477]            0.0849                      3         0.1111          &lt;list[6]&gt; 
+## INFO  [10:44:51.477]   x_domain classif.ce 
+## INFO  [10:44:51.477]  &lt;list[3]&gt;       0.02</code></pre>
+<pre><code>##    classif.rpart.cp classif.rpart.minsplit subsample.frac learner_param_vals
+## 1:           0.0849                      3         0.1111          &lt;list[6]&gt;
+##     x_domain classif.ce
+## 1: &lt;list[3]&gt;       0.02</code></pre>
+<p>To receive the results of each sampled configuration, we simply run the following snippet.</p>
+<div class="sourceCode" id="cb221"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb221-1"><a href="hyperband.html#cb221-1"></a>instance<span class="op">$</span>archive<span class="op">$</span><span class="kw">data</span>()[, <span class="kw">c</span>(</span>
+<span id="cb221-2"><a href="hyperband.html#cb221-2"></a>  <span class="st">&quot;subsample.frac&quot;</span>,</span>
+<span id="cb221-3"><a href="hyperband.html#cb221-3"></a>  <span class="st">&quot;classif.rpart.cp&quot;</span>,</span>
+<span id="cb221-4"><a href="hyperband.html#cb221-4"></a>  <span class="st">&quot;classif.rpart.minsplit&quot;</span>,</span>
+<span id="cb221-5"><a href="hyperband.html#cb221-5"></a>  <span class="st">&quot;classif.ce&quot;</span></span>
+<span id="cb221-6"><a href="hyperband.html#cb221-6"></a>), with =<span class="st"> </span><span class="ot">FALSE</span>]</span></code></pre></div>
+<pre><code>##     subsample.frac classif.rpart.cp classif.rpart.minsplit classif.ce
+##  1:         0.1111          0.02533                      3       0.06
+##  2:         0.1111          0.07348                      5       0.08
+##  3:         0.1111          0.08490                      3       0.02
+##  4:         0.1111          0.05026                      6       0.02
+##  5:         0.1111          0.03940                      4       0.08
+##  6:         0.1111          0.02540                      7       0.02
+##  7:         0.1111          0.01200                      4       0.10
+##  8:         0.1111          0.03961                      4       0.14
+##  9:         0.1111          0.05762                      6       0.04
+## 10:         0.3333          0.08490                      3       0.02
+## 11:         0.3333          0.05026                      6       0.04
+## 12:         0.3333          0.02540                      7       0.06
+## 13:         1.0000          0.08490                      3       0.04
+## 14:         0.3333          0.08650                      6       0.04
+## 15:         0.3333          0.07491                      9       0.04
+## 16:         0.3333          0.06716                      6       0.08
+## 17:         0.3333          0.06218                      9       0.04
+## 18:         0.3333          0.03785                      4       0.02
+## 19:         1.0000          0.03785                      4       0.04
+## 20:         1.0000          0.02724                     10       0.04
+## 21:         1.0000          0.05689                      3       0.04
+## 22:         1.0000          0.09141                      4       0.04
+##     subsample.frac classif.rpart.cp classif.rpart.minsplit classif.ce</code></pre>
+<p>You can access the best found configuration through the instance object.</p>
+<div class="sourceCode" id="cb223"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb223-1"><a href="hyperband.html#cb223-1"></a>instance<span class="op">$</span>result</span></code></pre></div>
+<pre><code>##    classif.rpart.cp classif.rpart.minsplit subsample.frac learner_param_vals
+## 1:           0.0849                      3         0.1111          &lt;list[6]&gt;
+##     x_domain classif.ce
+## 1: &lt;list[3]&gt;       0.02</code></pre>
+<div class="sourceCode" id="cb225"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb225-1"><a href="hyperband.html#cb225-1"></a>instance<span class="op">$</span>result_learner_param_vals</span></code></pre></div>
+<pre><code>## $subsample.frac
+## [1] 0.1111
+## 
+## $subsample.stratify
+## [1] FALSE
+## 
+## $subsample.replace
+## [1] FALSE
+## 
+## $classif.rpart.xval
+## [1] 0
+## 
+## $classif.rpart.cp
+## [1] 0.0849
+## 
+## $classif.rpart.minsplit
+## [1] 3</code></pre>
+<div class="sourceCode" id="cb227"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb227-1"><a href="hyperband.html#cb227-1"></a>instance<span class="op">$</span>result_y</span></code></pre></div>
+<pre><code>## classif.ce 
+##       0.02</code></pre>
+<p>If you are familiar with the original paper, you may have wondered how we just used Hyperband with a parameter ranging from <code>0.1</code> to <code>1.0</code> <span class="citation">(Li et al. <a href="#ref-Li2016" role="doc-biblioref">2016</a>)</span>.
+The answer is, with the help the internal rescaling of the budget parameter.
+<a href="https://mlr3hyperband.mlr-org.com">mlr3hyperband</a> automatically divides the budget parameters boundaries with its lower bound, ending up with a budget range starting again at <code>1</code>, like it is the case originally.
+If we want an overview of what bracket layout Hyperband created and how the rescaling in each bracket worked, we can print a compact table to see this information.</p>
+<div class="sourceCode" id="cb229"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb229-1"><a href="hyperband.html#cb229-1"></a><span class="kw">unique</span>(instance<span class="op">$</span>archive<span class="op">$</span><span class="kw">data</span>()[, .(bracket, bracket_stage, budget_scaled, budget_real, n_configs)])</span></code></pre></div>
+<pre><code>##    bracket bracket_stage budget_scaled budget_real n_configs
+## 1:       2             0         1.111      0.1111         9
+## 2:       2             1         3.333      0.3333         3
+## 3:       2             2        10.000      1.0000         1
+## 4:       1             0         3.333      0.3333         5
+## 5:       1             1        10.000      1.0000         1
+## 6:       0             0        10.000      1.0000         3</code></pre>
+<p>In the traditional way, Hyperband uses uniform sampling to receive a configuration sample at the start of each bracket.
+But it is also possible to define a custom <a href="https://paradox.mlr-org.com/reference/Sampler.html"><code>Sampler</code></a> for each hyperparameter.</p>
+<div class="sourceCode" id="cb231"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb231-1"><a href="hyperband.html#cb231-1"></a><span class="kw">library</span>(mlr3learners)</span>
+<span id="cb231-2"><a href="hyperband.html#cb231-2"></a><span class="kw">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb231-3"><a href="hyperband.html#cb231-3"></a></span>
+<span id="cb231-4"><a href="hyperband.html#cb231-4"></a>search_space =<span class="st"> </span>ParamSet<span class="op">$</span><span class="kw">new</span>(<span class="kw">list</span>(</span>
+<span id="cb231-5"><a href="hyperband.html#cb231-5"></a>  ParamInt<span class="op">$</span><span class="kw">new</span>(<span class="st">&quot;nrounds&quot;</span>, <span class="dt">lower =</span> <span class="dv">1</span>, <span class="dt">upper =</span> <span class="dv">16</span>, <span class="dt">tag =</span> <span class="st">&quot;budget&quot;</span>),</span>
+<span id="cb231-6"><a href="hyperband.html#cb231-6"></a>  ParamDbl<span class="op">$</span><span class="kw">new</span>(<span class="st">&quot;eta&quot;</span>,     <span class="dt">lower =</span> <span class="dv">0</span>, <span class="dt">upper =</span> <span class="dv">1</span>),</span>
+<span id="cb231-7"><a href="hyperband.html#cb231-7"></a>  ParamFct<span class="op">$</span><span class="kw">new</span>(<span class="st">&quot;booster&quot;</span>, <span class="dt">levels =</span> <span class="kw">c</span>(<span class="st">&quot;gbtree&quot;</span>, <span class="st">&quot;gblinear&quot;</span>, <span class="st">&quot;dart&quot;</span>))</span>
+<span id="cb231-8"><a href="hyperband.html#cb231-8"></a>))</span>
+<span id="cb231-9"><a href="hyperband.html#cb231-9"></a></span>
+<span id="cb231-10"><a href="hyperband.html#cb231-10"></a>instance =<span class="st"> </span>TuningInstanceSingleCrit<span class="op">$</span><span class="kw">new</span>(</span>
+<span id="cb231-11"><a href="hyperband.html#cb231-11"></a>  <span class="dt">task =</span> <span class="kw">tsk</span>(<span class="st">&quot;iris&quot;</span>), </span>
+<span id="cb231-12"><a href="hyperband.html#cb231-12"></a>  <span class="dt">learner =</span> <span class="kw">lrn</span>(<span class="st">&quot;classif.xgboost&quot;</span>), </span>
+<span id="cb231-13"><a href="hyperband.html#cb231-13"></a>  <span class="dt">resampling =</span> <span class="kw">rsmp</span>(<span class="st">&quot;holdout&quot;</span>), </span>
+<span id="cb231-14"><a href="hyperband.html#cb231-14"></a>  <span class="dt">measure =</span> <span class="kw">msr</span>(<span class="st">&quot;classif.ce&quot;</span>), </span>
+<span id="cb231-15"><a href="hyperband.html#cb231-15"></a>  <span class="dt">terminator =</span> <span class="kw">trm</span>(<span class="st">&quot;none&quot;</span>), <span class="co"># hyperband terminates itself</span></span>
+<span id="cb231-16"><a href="hyperband.html#cb231-16"></a>  <span class="dt">search_space =</span> search_space</span>
+<span id="cb231-17"><a href="hyperband.html#cb231-17"></a>)</span>
+<span id="cb231-18"><a href="hyperband.html#cb231-18"></a></span>
+<span id="cb231-19"><a href="hyperband.html#cb231-19"></a><span class="co"># beta distribution with alpha = 2 and beta = 5</span></span>
+<span id="cb231-20"><a href="hyperband.html#cb231-20"></a><span class="co"># categorical distribution with custom probabilities</span></span>
+<span id="cb231-21"><a href="hyperband.html#cb231-21"></a>sampler =<span class="st"> </span>SamplerJointIndep<span class="op">$</span><span class="kw">new</span>(<span class="kw">list</span>(</span>
+<span id="cb231-22"><a href="hyperband.html#cb231-22"></a>  Sampler1DRfun<span class="op">$</span><span class="kw">new</span>(search_space<span class="op">$</span>params[[<span class="dv">2</span>]], <span class="cf">function</span>(n) <span class="kw">rbeta</span>(n, <span class="dv">2</span>, <span class="dv">5</span>)),</span>
+<span id="cb231-23"><a href="hyperband.html#cb231-23"></a>  Sampler1DCateg<span class="op">$</span><span class="kw">new</span>(search_space<span class="op">$</span>params[[<span class="dv">3</span>]], <span class="dt">prob =</span> <span class="kw">c</span>(<span class="fl">0.2</span>, <span class="fl">0.3</span>, <span class="fl">0.5</span>))</span>
+<span id="cb231-24"><a href="hyperband.html#cb231-24"></a>))</span></code></pre></div>
+<p>Then, the defined sampler has to be given as an argument during instance creation.
+Afterwards, the usual tuning can proceed.</p>
+<div class="sourceCode" id="cb232"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb232-1"><a href="hyperband.html#cb232-1"></a>tuner =<span class="st"> </span><span class="kw">tnr</span>(<span class="st">&quot;hyperband&quot;</span>, <span class="dt">eta =</span> <span class="dv">2</span>, <span class="dt">sampler =</span> sampler)</span>
+<span id="cb232-2"><a href="hyperband.html#cb232-2"></a>tuner<span class="op">$</span><span class="kw">optimize</span>(instance)</span></code></pre></div>
+<pre><code>## INFO  [10:44:51.831] Starting to optimize 3 parameter(s) with &#39;&lt;TunerHyperband&gt;&#39; and &#39;&lt;TerminatorNone&gt;&#39; 
+## INFO  [10:44:51.834] Amount of brackets to be evaluated = 5,  
+## INFO  [10:44:51.835] Start evaluation of bracket 1 
+## INFO  [10:44:51.840] Training 16 configs with budget of 1 for each 
+## INFO  [10:44:51.843] Evaluating 16 configuration(s) 
+## INFO  [10:44:54.614] Result of batch 1: 
+## INFO  [10:44:54.617]      eta  booster nrounds bracket bracket_stage budget_scaled budget_real 
+## INFO  [10:44:54.617]  0.16633 gblinear       1       4             0             1           1 
+## INFO  [10:44:54.617]  0.53672 gblinear       1       4             0             1           1 
+## INFO  [10:44:54.617]  0.23163     dart       1       4             0             1           1 
+## INFO  [10:44:54.617]  0.09921     dart       1       4             0             1           1 
+## INFO  [10:44:54.617]  0.32375     dart       1       4             0             1           1 
+## INFO  [10:44:54.617]  0.25848 gblinear       1       4             0             1           1 
+## INFO  [10:44:54.617]  0.28688 gblinear       1       4             0             1           1 
+## INFO  [10:44:54.617]  0.36995   gbtree       1       4             0             1           1 
+## INFO  [10:44:54.617]  0.21663 gblinear       1       4             0             1           1 
+## INFO  [10:44:54.617]  0.43376     dart       1       4             0             1           1 
+## INFO  [10:44:54.617]  0.24324 gblinear       1       4             0             1           1 
+## INFO  [10:44:54.617]  0.35749     dart       1       4             0             1           1 
+## INFO  [10:44:54.617]  0.38180     dart       1       4             0             1           1 
+## INFO  [10:44:54.617]  0.22436     dart       1       4             0             1           1 
+## INFO  [10:44:54.617]  0.57168     dart       1       4             0             1           1 
+## INFO  [10:44:54.617]  0.52773   gbtree       1       4             0             1           1 
+## INFO  [10:44:54.617]  n_configs classif.ce                                uhash 
+## INFO  [10:44:54.617]         16       0.74 71e836a8-ee0f-45a6-84bb-cb7cab4dcda9 
+## INFO  [10:44:54.617]         16       0.42 dffe5486-75ca-4d43-a4eb-86a6e919e10f 
+## INFO  [10:44:54.617]         16       0.04 1e1065a0-5a34-4231-b158-1f299c1a0708 
+## INFO  [10:44:54.617]         16       0.04 b6c3c39d-0e51-4483-9327-f65422cb841b 
+## INFO  [10:44:54.617]         16       0.04 c00fdecc-9b7b-4804-af0f-b0318d64a8df 
+## INFO  [10:44:54.617]         16       0.70 0566ae92-1d44-4ec3-a22b-2b221eac5fa4 
+## INFO  [10:44:54.617]         16       0.54 c78c56c1-6203-4f8e-80a0-860c17cff16f 
+## INFO  [10:44:54.617]         16       0.04 28928503-f123-4405-9577-ec96af36595e 
+## INFO  [10:44:54.617]         16       0.74 c6be1ab1-eb24-4bf4-8f00-fb3cb82e2840 
+## INFO  [10:44:54.617]         16       0.04 cb57ec4b-5362-4976-994a-95df58537e33 
+## INFO  [10:44:54.617]         16       0.72 5d51df9e-23ea-4aad-84ad-f23232eefaa5 
+## INFO  [10:44:54.617]         16       0.04 4abc42ce-9dc8-47d8-a3d1-313ee3a50b9b 
+## INFO  [10:44:54.617]         16       0.04 1d7f58ac-72f2-4038-a5d2-d218cd81753b 
+## INFO  [10:44:54.617]         16       0.04 3eaedcf0-fde3-49e0-a9e5-52ec94c806c3 
+## INFO  [10:44:54.617]         16       0.04 a3bc5786-18be-4a47-8051-3486362d0537 
+## INFO  [10:44:54.617]         16       0.04 7a934be8-74fa-4835-9843-c90858a2c79c 
+## INFO  [10:44:54.619] Training 8 configs with budget of 2 for each 
+## INFO  [10:44:54.623] Evaluating 8 configuration(s) 
+## INFO  [10:44:55.498] Result of batch 2: 
+## INFO  [10:44:55.501]      eta booster nrounds bracket bracket_stage budget_scaled budget_real 
+## INFO  [10:44:55.501]  0.23163    dart       2       4             1             2           2 
+## INFO  [10:44:55.501]  0.09921    dart       2       4             1             2           2 
+## INFO  [10:44:55.501]  0.32375    dart       2       4             1             2           2 
+## INFO  [10:44:55.501]  0.36995  gbtree       2       4             1             2           2 
+## INFO  [10:44:55.501]  0.43376    dart       2       4             1             2           2 
+## INFO  [10:44:55.501]  0.35749    dart       2       4             1             2           2 
+## INFO  [10:44:55.501]  0.38180    dart       2       4             1             2           2 
+## INFO  [10:44:55.501]  0.22436    dart       2       4             1             2           2 
+## INFO  [10:44:55.501]  n_configs classif.ce                                uhash 
+## INFO  [10:44:55.501]          8       0.04 26bf8c48-a4a9-42a0-ba17-921a40b760ff 
+## INFO  [10:44:55.501]          8       0.04 4f42229c-0783-4b53-90a1-4a72f01286b3 
+## INFO  [10:44:55.501]          8       0.04 4e393f0c-83c4-4d8c-b519-1f7a4e2de01e 
+## INFO  [10:44:55.501]          8       0.04 95de4fd2-e9c8-42f3-8113-d247730b92b1 
+## INFO  [10:44:55.501]          8       0.04 cdff104c-c835-46ad-bc5a-20cdccda190f 
+## INFO  [10:44:55.501]          8       0.04 62d3d2e8-b136-4cc8-ae01-e3c127f1efb3 
+## INFO  [10:44:55.501]          8       0.04 9de1ffb3-0cc6-4047-91b8-3e428cbc96e4 
+## INFO  [10:44:55.501]          8       0.04 63d5aee5-1a5a-4531-97b3-44e41b55b995 
+## INFO  [10:44:55.503] Training 4 configs with budget of 4 for each 
+## INFO  [10:44:55.506] Evaluating 4 configuration(s) 
+## INFO  [10:44:55.979] Result of batch 3: 
+## INFO  [10:44:55.982]      eta booster nrounds bracket bracket_stage budget_scaled budget_real 
+## INFO  [10:44:55.982]  0.23163    dart       4       4             2             4           4 
+## INFO  [10:44:55.982]  0.09921    dart       4       4             2             4           4 
+## INFO  [10:44:55.982]  0.32375    dart       4       4             2             4           4 
+## INFO  [10:44:55.982]  0.36995  gbtree       4       4             2             4           4 
+## INFO  [10:44:55.982]  n_configs classif.ce                                uhash 
+## INFO  [10:44:55.982]          4       0.04 7ca11558-ab50-48b7-9564-9adba459a077 
+## INFO  [10:44:55.982]          4       0.04 975d8805-8340-482c-b0ed-87518543a9fd 
+## INFO  [10:44:55.982]          4       0.04 289201b4-97c6-42b8-b6a0-6d770e590394 
+## INFO  [10:44:55.982]          4       0.04 2a4a1493-e240-4743-81c5-0de529158b07 
+## INFO  [10:44:55.983] Training 2 configs with budget of 8 for each 
+## INFO  [10:44:55.986] Evaluating 2 configuration(s) 
+## INFO  [10:44:56.262] Result of batch 4: 
+## INFO  [10:44:56.265]      eta booster nrounds bracket bracket_stage budget_scaled budget_real 
+## INFO  [10:44:56.265]  0.23163    dart       8       4             3             8           8 
+## INFO  [10:44:56.265]  0.09921    dart       8       4             3             8           8 
+## INFO  [10:44:56.265]  n_configs classif.ce                                uhash 
+## INFO  [10:44:56.265]          2       0.04 2b19bb38-6c03-4f4e-982f-317f65c85832 
+## INFO  [10:44:56.265]          2       0.04 7bf4dfd1-d603-40b3-8832-0913644aeae2 
+## INFO  [10:44:56.266] Training 1 configs with budget of 16 for each 
+## INFO  [10:44:56.269] Evaluating 1 configuration(s) 
+## INFO  [10:44:56.446] Result of batch 5: 
+## INFO  [10:44:56.449]     eta booster nrounds bracket bracket_stage budget_scaled budget_real 
+## INFO  [10:44:56.449]  0.2316    dart      16       4             4            16          16 
+## INFO  [10:44:56.449]  n_configs classif.ce                                uhash 
+## INFO  [10:44:56.449]          1       0.04 0c819377-8f08-4ea7-accc-61bb1e0ff3a3 
+## INFO  [10:44:56.451] Start evaluation of bracket 2 
+## INFO  [10:44:56.455] Training 10 configs with budget of 2 for each 
+## INFO  [10:44:56.458] Evaluating 10 configuration(s) 
+## INFO  [10:44:57.533] Result of batch 6: 
+## INFO  [10:44:57.536]      eta  booster nrounds bracket bracket_stage budget_scaled budget_real 
+## INFO  [10:44:57.536]  0.17165 gblinear       2       3             0             2           2 
+## INFO  [10:44:57.536]  0.33565   gbtree       2       3             0             2           2 
+## INFO  [10:44:57.536]  0.30172   gbtree       2       3             0             2           2 
+## INFO  [10:44:57.536]  0.12918     dart       2       3             0             2           2 
+## INFO  [10:44:57.536]  0.27153     dart       2       3             0             2           2 
+## INFO  [10:44:57.536]  0.38573 gblinear       2       3             0             2           2 
+## INFO  [10:44:57.536]  0.29412 gblinear       2       3             0             2           2 
+## INFO  [10:44:57.536]  0.20787     dart       2       3             0             2           2 
+## INFO  [10:44:57.536]  0.03459 gblinear       2       3             0             2           2 
+## INFO  [10:44:57.536]  0.56669 gblinear       2       3             0             2           2 
+## INFO  [10:44:57.536]  n_configs classif.ce                                uhash 
+## INFO  [10:44:57.536]         10       0.72 9e0653c6-ce16-4b05-ab5d-17c5bf22a42f 
+## INFO  [10:44:57.536]         10       0.04 7852a93a-7571-4106-a88a-059fd93916d2 
+## INFO  [10:44:57.536]         10       0.04 4a2cb926-2a7a-4dd5-a2a5-33b26ec1aa30 
+## INFO  [10:44:57.536]         10       0.04 8e69320a-0dca-42b3-acd0-9bb5c377682d 
+## INFO  [10:44:57.536]         10       0.04 ba26b347-2bbd-4fe3-b185-118f8de12fbb 
+## INFO  [10:44:57.536]         10       0.42 447e3f44-5875-411d-b208-f4e497e5016d 
+## INFO  [10:44:57.536]         10       0.44 172cb973-08b1-463b-a55e-5179fac2b380 
+## INFO  [10:44:57.536]         10       0.04 d332b07f-885c-4f01-8d12-9175551ab091 
+## INFO  [10:44:57.536]         10       0.74 99814c5f-7879-494d-a538-3756f8e2b16b 
+## INFO  [10:44:57.536]         10       0.42 910c914a-c831-458b-8aa4-2f2c3b903a37 
+## INFO  [10:44:57.537] Training 5 configs with budget of 4 for each 
+## INFO  [10:44:57.541] Evaluating 5 configuration(s) 
+## INFO  [10:44:58.138] Result of batch 7: 
+## INFO  [10:44:58.141]     eta booster nrounds bracket bracket_stage budget_scaled budget_real 
+## INFO  [10:44:58.141]  0.3356  gbtree       4       3             1             4           4 
+## INFO  [10:44:58.141]  0.3017  gbtree       4       3             1             4           4 
+## INFO  [10:44:58.141]  0.1292    dart       4       3             1             4           4 
+## INFO  [10:44:58.141]  0.2715    dart       4       3             1             4           4 
+## INFO  [10:44:58.141]  0.2079    dart       4       3             1             4           4 
+## INFO  [10:44:58.141]  n_configs classif.ce                                uhash 
+## INFO  [10:44:58.141]          5       0.04 293e449a-10ca-47d8-8cd2-eead899bff78 
+## INFO  [10:44:58.141]          5       0.04 40fecec3-9f4f-4064-b0dc-9dc9a3b36516 
+## INFO  [10:44:58.141]          5       0.04 e83c1c65-3fe6-4a03-b258-7e436e5c6e20 
+## INFO  [10:44:58.141]          5       0.04 855470cb-07b9-4042-a62a-893bb096d852 
+## INFO  [10:44:58.141]          5       0.04 d957a6f3-e936-4f71-b1ca-2ec58f7fa436 
+## INFO  [10:44:58.142] Training 2 configs with budget of 8 for each 
+## INFO  [10:44:58.146] Evaluating 2 configuration(s) 
+## INFO  [10:44:58.428] Result of batch 8: 
+## INFO  [10:44:58.430]     eta booster nrounds bracket bracket_stage budget_scaled budget_real 
+## INFO  [10:44:58.430]  0.3356  gbtree       8       3             2             8           8 
+## INFO  [10:44:58.430]  0.3017  gbtree       8       3             2             8           8 
+## INFO  [10:44:58.430]  n_configs classif.ce                                uhash 
+## INFO  [10:44:58.430]          2       0.04 8bcd6180-b27b-4dda-bd70-9767d6f7790b 
+## INFO  [10:44:58.430]          2       0.04 767b1b61-1752-44da-ba77-6d34b275d5fe 
+## INFO  [10:44:58.432] Training 1 configs with budget of 16 for each 
+## INFO  [10:44:58.435] Evaluating 1 configuration(s) 
+## INFO  [10:44:58.624] Result of batch 9: 
+## INFO  [10:44:58.627]     eta booster nrounds bracket bracket_stage budget_scaled budget_real 
+## INFO  [10:44:58.627]  0.3356  gbtree      16       3             3            16          16 
+## INFO  [10:44:58.627]  n_configs classif.ce                                uhash 
+## INFO  [10:44:58.627]          1       0.04 72bed989-abc4-499f-bad7-5c26fd8b2f77 
+## INFO  [10:44:58.628] Start evaluation of bracket 3 
+## INFO  [10:44:58.633] Training 7 configs with budget of 4 for each 
+## INFO  [10:44:58.636] Evaluating 7 configuration(s) 
+## INFO  [10:44:59.428] Result of batch 10: 
+## INFO  [10:44:59.431]      eta  booster nrounds bracket bracket_stage budget_scaled budget_real 
+## INFO  [10:44:59.431]  0.41312 gblinear       4       2             0             4           4 
+## INFO  [10:44:59.431]  0.21633     dart       4       2             0             4           4 
+## INFO  [10:44:59.431]  0.52311     dart       4       2             0             4           4 
+## INFO  [10:44:59.431]  0.21596     dart       4       2             0             4           4 
+## INFO  [10:44:59.431]  0.54437   gbtree       4       2             0             4           4 
+## INFO  [10:44:59.431]  0.11852     dart       4       2             0             4           4 
+## INFO  [10:44:59.431]  0.09508     dart       4       2             0             4           4 
+## INFO  [10:44:59.431]  n_configs classif.ce                                uhash 
+## INFO  [10:44:59.431]          7       0.42 6b00a3f5-7488-4ed3-87cd-1370f2d8aea1 
+## INFO  [10:44:59.431]          7       0.04 42f7788f-070a-46d9-9891-2172163cc61a 
+## INFO  [10:44:59.431]          7       0.04 a578acbd-0534-410f-8a6a-6e0ce46625ac 
+## INFO  [10:44:59.431]          7       0.04 250f7a44-a42b-48bd-879a-582cca090de5 
+## INFO  [10:44:59.431]          7       0.04 1d1cd27a-cecd-43c4-a5ab-a88d9780d407 
+## INFO  [10:44:59.431]          7       0.04 cee2b457-fe5b-4952-9e88-a27745eab902 
+## INFO  [10:44:59.431]          7       0.04 74a56ff9-2f3a-4a70-ad8e-9b24f8173e6e 
+## INFO  [10:44:59.432] Training 3 configs with budget of 8 for each 
+## INFO  [10:44:59.436] Evaluating 3 configuration(s) 
+## INFO  [10:45:00.077] Result of batch 11: 
+## INFO  [10:45:00.080]     eta booster nrounds bracket bracket_stage budget_scaled budget_real 
+## INFO  [10:45:00.080]  0.2163    dart       8       2             1             8           8 
+## INFO  [10:45:00.080]  0.5231    dart       8       2             1             8           8 
+## INFO  [10:45:00.080]  0.2160    dart       8       2             1             8           8 
+## INFO  [10:45:00.080]  n_configs classif.ce                                uhash 
+## INFO  [10:45:00.080]          3       0.04 278c80a5-697f-49f0-ae16-2675c8c61635 
+## INFO  [10:45:00.080]          3       0.04 65848d97-121a-4ae0-84d3-739fac4a75f3 
+## INFO  [10:45:00.080]          3       0.04 f69dfbb0-4226-4863-aba4-436654f1d68e 
+## INFO  [10:45:00.081] Training 1 configs with budget of 16 for each 
+## INFO  [10:45:00.084] Evaluating 1 configuration(s) 
+## INFO  [10:45:00.252] Result of batch 12: 
+## INFO  [10:45:00.255]     eta booster nrounds bracket bracket_stage budget_scaled budget_real 
+## INFO  [10:45:00.255]  0.2163    dart      16       2             2            16          16 
+## INFO  [10:45:00.255]  n_configs classif.ce                                uhash 
+## INFO  [10:45:00.255]          1       0.04 f515c27d-f0a5-4ab0-a567-aa12b946e60f 
+## INFO  [10:45:00.257] Start evaluation of bracket 4 
+## INFO  [10:45:00.261] Training 5 configs with budget of 8 for each 
+## INFO  [10:45:00.264] Evaluating 5 configuration(s) 
+## INFO  [10:45:00.817] Result of batch 13: 
+## INFO  [10:45:00.820]     eta  booster nrounds bracket bracket_stage budget_scaled budget_real 
+## INFO  [10:45:00.820]  0.2462   gbtree       8       1             0             8           8 
+## INFO  [10:45:00.820]  0.5226 gblinear       8       1             0             8           8 
+## INFO  [10:45:00.820]  0.1413 gblinear       8       1             0             8           8 
+## INFO  [10:45:00.820]  0.1950     dart       8       1             0             8           8 
+## INFO  [10:45:00.820]  0.4708 gblinear       8       1             0             8           8 
+## INFO  [10:45:00.820]  n_configs classif.ce                                uhash 
+## INFO  [10:45:00.820]          5       0.04 79aaa28a-efbe-4136-9bc2-233425776483 
+## INFO  [10:45:00.820]          5       0.42 8b9cae15-4214-4028-9682-f264431b459f 
+## INFO  [10:45:00.820]          5       0.42 ae5dc896-eef3-48fe-8f17-a9027925ef5b 
+## INFO  [10:45:00.820]          5       0.04 dbef1eda-addb-433e-b538-6422fdd4a381 
+## INFO  [10:45:00.820]          5       0.42 33a18998-0669-4a38-8b83-ecc800f48124 
+## INFO  [10:45:00.822] Training 2 configs with budget of 16 for each 
+## INFO  [10:45:00.826] Evaluating 2 configuration(s) 
+## INFO  [10:45:01.104] Result of batch 14: 
+## INFO  [10:45:01.107]     eta booster nrounds bracket bracket_stage budget_scaled budget_real 
+## INFO  [10:45:01.107]  0.2462  gbtree      16       1             1            16          16 
+## INFO  [10:45:01.107]  0.1950    dart      16       1             1            16          16 
+## INFO  [10:45:01.107]  n_configs classif.ce                                uhash 
+## INFO  [10:45:01.107]          2       0.04 e62bdfb6-13db-4412-9e03-e334294912b1 
+## INFO  [10:45:01.107]          2       0.04 51076eef-743a-4088-ab5c-1cf47fe1d32b 
+## INFO  [10:45:01.108] Start evaluation of bracket 5 
+## INFO  [10:45:01.113] Training 5 configs with budget of 16 for each 
+## INFO  [10:45:01.115] Evaluating 5 configuration(s) 
+## INFO  [10:45:01.689] Result of batch 15: 
+## INFO  [10:45:01.696]      eta booster nrounds bracket bracket_stage budget_scaled budget_real 
+## INFO  [10:45:01.696]  0.08993    dart      16       0             0            16          16 
+## INFO  [10:45:01.696]  0.42262    dart      16       0             0            16          16 
+## INFO  [10:45:01.696]  0.09600  gbtree      16       0             0            16          16 
+## INFO  [10:45:01.696]  0.17779    dart      16       0             0            16          16 
+## INFO  [10:45:01.696]  0.61866    dart      16       0             0            16          16 
+## INFO  [10:45:01.696]  n_configs classif.ce                                uhash 
+## INFO  [10:45:01.696]          5       0.04 ebd7cbba-f552-49e6-9325-bfb3ba00db79 
+## INFO  [10:45:01.696]          5       0.04 980a2d43-1a4e-4cdc-a269-27b2c8d9dc87 
+## INFO  [10:45:01.696]          5       0.04 088b5c31-b18c-4597-a247-911868cf5aac 
+## INFO  [10:45:01.696]          5       0.04 b374c122-2479-4c11-985c-6ede2f5e23d1 
+## INFO  [10:45:01.696]          5       0.04 ea609959-c5fc-4cd8-b652-4a50978a0610 
+## INFO  [10:45:01.704] Finished optimizing after 72 evaluation(s) 
+## INFO  [10:45:01.705] Result: 
+## INFO  [10:45:01.707]  nrounds    eta booster learner_param_vals  x_domain classif.ce 
+## INFO  [10:45:01.707]        1 0.2316    dart          &lt;list[4]&gt; &lt;list[3]&gt;       0.04</code></pre>
+<pre><code>##    nrounds    eta booster learner_param_vals  x_domain classif.ce
+## 1:       1 0.2316    dart          &lt;list[4]&gt; &lt;list[3]&gt;       0.04</code></pre>
+<div class="sourceCode" id="cb235"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb235-1"><a href="hyperband.html#cb235-1"></a>instance<span class="op">$</span>result</span></code></pre></div>
+<pre><code>##    nrounds    eta booster learner_param_vals  x_domain classif.ce
+## 1:       1 0.2316    dart          &lt;list[4]&gt; &lt;list[3]&gt;       0.04</code></pre>
+<p>Furthermore, we extended the original algorithm, to make it also possible to use <a href="https://mlr3hyperband.mlr-org.com">mlr3hyperband</a> for multi-objective optimization.
+To do this, simply specify more measures in the <a href="https://mlr3tuning.mlr-org.com/reference/TuningInstanceMultiCrit.html"><code>TuningInstanceMultiCrit</code></a> and run the rest as usual.</p>
+<div class="sourceCode" id="cb237"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb237-1"><a href="hyperband.html#cb237-1"></a>instance =<span class="st"> </span>TuningInstanceMultiCrit<span class="op">$</span><span class="kw">new</span>(</span>
+<span id="cb237-2"><a href="hyperband.html#cb237-2"></a>  <span class="dt">task =</span> <span class="kw">tsk</span>(<span class="st">&quot;pima&quot;</span>), </span>
+<span id="cb237-3"><a href="hyperband.html#cb237-3"></a>  <span class="dt">learner =</span> <span class="kw">lrn</span>(<span class="st">&quot;classif.xgboost&quot;</span>), </span>
+<span id="cb237-4"><a href="hyperband.html#cb237-4"></a>  <span class="dt">resampling =</span> <span class="kw">rsmp</span>(<span class="st">&quot;holdout&quot;</span>), </span>
+<span id="cb237-5"><a href="hyperband.html#cb237-5"></a>  <span class="dt">measures =</span> <span class="kw">msrs</span>(<span class="kw">c</span>(<span class="st">&quot;classif.tpr&quot;</span>, <span class="st">&quot;classif.fpr&quot;</span>)), </span>
+<span id="cb237-6"><a href="hyperband.html#cb237-6"></a>  <span class="dt">terminator =</span> <span class="kw">trm</span>(<span class="st">&quot;none&quot;</span>), <span class="co"># hyperband terminates itself</span></span>
+<span id="cb237-7"><a href="hyperband.html#cb237-7"></a>  <span class="dt">search_space =</span> search_space</span>
+<span id="cb237-8"><a href="hyperband.html#cb237-8"></a>)</span>
+<span id="cb237-9"><a href="hyperband.html#cb237-9"></a></span>
+<span id="cb237-10"><a href="hyperband.html#cb237-10"></a>tuner =<span class="st"> </span><span class="kw">tnr</span>(<span class="st">&quot;hyperband&quot;</span>, <span class="dt">eta =</span> <span class="dv">4</span>)</span>
+<span id="cb237-11"><a href="hyperband.html#cb237-11"></a>tuner<span class="op">$</span><span class="kw">optimize</span>(instance)</span></code></pre></div>
+<pre><code>## INFO  [10:45:02.020] Starting to optimize 3 parameter(s) with &#39;&lt;TunerHyperband&gt;&#39; and &#39;&lt;TerminatorNone&gt;&#39; 
+## INFO  [10:45:02.032] Amount of brackets to be evaluated = 3,  
+## INFO  [10:45:02.033] Start evaluation of bracket 1 
+## INFO  [10:45:02.037] Training 16 configs with budget of 1 for each 
+## INFO  [10:45:02.040] Evaluating 16 configuration(s) 
+## INFO  [10:45:03.797] Result of batch 1: 
+## INFO  [10:45:03.800]      eta  booster nrounds bracket bracket_stage budget_scaled budget_real 
+## INFO  [10:45:03.800]  0.20737 gblinear       1       2             0             1           1 
+## INFO  [10:45:03.800]  0.45924   gbtree       1       2             0             1           1 
+## INFO  [10:45:03.800]  0.24150 gblinear       1       2             0             1           1 
+## INFO  [10:45:03.800]  0.11869   gbtree       1       2             0             1           1 
+## INFO  [10:45:03.800]  0.07247   gbtree       1       2             0             1           1 
+## INFO  [10:45:03.800]  0.69099     dart       1       2             0             1           1 
+## INFO  [10:45:03.800]  0.28696     dart       1       2             0             1           1 
+## INFO  [10:45:03.800]  0.14941     dart       1       2             0             1           1 
+## INFO  [10:45:03.800]  0.97243   gbtree       1       2             0             1           1 
+## INFO  [10:45:03.800]  0.41051 gblinear       1       2             0             1           1 
+## INFO  [10:45:03.800]  0.40181     dart       1       2             0             1           1 
+## INFO  [10:45:03.800]  0.64856     dart       1       2             0             1           1 
+## INFO  [10:45:03.800]  0.91631 gblinear       1       2             0             1           1 
+## INFO  [10:45:03.800]  0.21666   gbtree       1       2             0             1           1 
+## INFO  [10:45:03.800]  0.54800 gblinear       1       2             0             1           1 
+## INFO  [10:45:03.800]  0.72005 gblinear       1       2             0             1           1 
+## INFO  [10:45:03.800]  n_configs classif.tpr classif.fpr                                uhash 
+## INFO  [10:45:03.800]         16      0.0000      0.0000 717a29fe-9c3b-451a-90ff-e8b5e0731750 
+## INFO  [10:45:03.800]         16      0.7531      0.2571 b3742f79-3409-4984-bdf3-91f3cdd18be7 
+## INFO  [10:45:03.800]         16      0.0000      0.0000 eff976ae-f667-46a6-9b20-21cb4f0075dc 
+## INFO  [10:45:03.800]         16      0.7407      0.2457 4db731fb-db63-4574-886b-2133a5fde57f 
+## INFO  [10:45:03.800]         16      0.7407      0.2571 a7873fc7-c629-4b15-a49b-c362657118b9 
+## INFO  [10:45:03.800]         16      0.7407      0.2629 c3d0fd49-95b3-47f4-97b4-a20ba51bd32d 
+## INFO  [10:45:03.800]         16      0.7531      0.2629 1aa995e3-cf73-45c1-83e9-1513761d86bb 
+## INFO  [10:45:03.800]         16      0.7407      0.2514 4085a50a-e564-4d94-b575-95d2360f2750 
+## INFO  [10:45:03.800]         16      0.7531      0.2571 94b383de-0c7e-42e0-a2df-50bcd444a26b 
+## INFO  [10:45:03.800]         16      0.0000      0.0000 f8063800-d3db-4c8a-acb8-1cca28ed89c5 
+## INFO  [10:45:03.800]         16      0.7407      0.2457 c68f2a4e-fd96-4b03-992e-c74f5d05c0b4 
+## INFO  [10:45:03.800]         16      0.7531      0.2686 de09a418-ffcd-4625-8703-03528e9edd55 
+## INFO  [10:45:03.800]         16      0.0000      0.0000 0e44d548-4491-436e-b054-725902147943 
+## INFO  [10:45:03.800]         16      0.7407      0.2571 9b2d3152-3efc-4f29-ac37-96789fffdb0c 
+## INFO  [10:45:03.800]         16      0.0000      0.0000 dce43302-a10a-41bf-9395-e6cdb65ed303 
+## INFO  [10:45:03.800]         16      0.0000      0.0000 71d07432-ac12-45f4-9d6e-ad1948187505 
+## INFO  [10:45:03.801] Training 4 configs with budget of 4 for each 
+## INFO  [10:45:03.807] Evaluating 4 configuration(s) 
+## INFO  [10:45:04.332] Result of batch 2: 
+## INFO  [10:45:04.334]     eta  booster nrounds bracket bracket_stage budget_scaled budget_real 
+## INFO  [10:45:04.334]  0.4592   gbtree       4       2             1             4           4 
+## INFO  [10:45:04.334]  0.1187   gbtree       4       2             1             4           4 
+## INFO  [10:45:04.334]  0.5480 gblinear       4       2             1             4           4 
+## INFO  [10:45:04.334]  0.7201 gblinear       4       2             1             4           4 
+## INFO  [10:45:04.334]  n_configs classif.tpr classif.fpr                                uhash 
+## INFO  [10:45:04.334]          4     0.66667     0.18286 7b57aab4-ad91-4d0f-a783-85e29a61d2cf 
+## INFO  [10:45:04.334]          4     0.72840     0.22286 0ad94bce-fcec-4cb0-afa6-122e06d0acd4 
+## INFO  [10:45:04.334]          4     0.04938     0.02857 35cf0e36-5a24-4c51-96ad-39d273261a57 
+## INFO  [10:45:04.334]          4     0.11111     0.05143 534dc36d-570b-4fa5-be5f-9c2cfaaf5075 
+## INFO  [10:45:04.336] Training 1 configs with budget of 16 for each 
+## INFO  [10:45:04.340] Evaluating 1 configuration(s) 
+## INFO  [10:45:04.538] Result of batch 3: 
+## INFO  [10:45:04.541]     eta booster nrounds bracket bracket_stage budget_scaled budget_real 
+## INFO  [10:45:04.541]  0.1187  gbtree      16       2             2            16          16 
+## INFO  [10:45:04.541]  n_configs classif.tpr classif.fpr                                uhash 
+## INFO  [10:45:04.541]          1      0.5926      0.1543 8369b1aa-6763-4fd3-8310-ffbb5f4656dc 
+## INFO  [10:45:04.543] Start evaluation of bracket 2 
+## INFO  [10:45:04.547] Training 6 configs with budget of 4 for each 
+## INFO  [10:45:04.549] Evaluating 6 configuration(s) 
+## INFO  [10:45:05.261] Result of batch 4: 
+## INFO  [10:45:05.264]      eta  booster nrounds bracket bracket_stage budget_scaled budget_real 
+## INFO  [10:45:05.264]  0.98871     dart       4       1             0             4           4 
+## INFO  [10:45:05.264]  0.06475   gbtree       4       1             0             4           4 
+## INFO  [10:45:05.264]  0.15766 gblinear       4       1             0             4           4 
+## INFO  [10:45:05.264]  0.78535   gbtree       4       1             0             4           4 
+## INFO  [10:45:05.264]  0.54219     dart       4       1             0             4           4 
+## INFO  [10:45:05.264]  0.41655 gblinear       4       1             0             4           4 
+## INFO  [10:45:05.264]  n_configs classif.tpr classif.fpr                                uhash 
+## INFO  [10:45:05.264]          6     0.61728     0.17714 40da3d3f-13b1-4648-83e0-4107e96df37d 
+## INFO  [10:45:05.264]          6     0.64198     0.18286 7e0129f2-51c5-4c8a-a002-69c573147c0a 
+## INFO  [10:45:05.264]          6     0.00000     0.00000 273090c8-ac28-4397-902a-07bfe01420f5 
+## INFO  [10:45:05.264]          6     0.66667     0.18857 2e6e83bd-45ca-4025-856b-0d38590e2309 
+## INFO  [10:45:05.264]          6     0.60494     0.15429 1fea0aca-c5df-4ad0-bda5-fcaf36a5afa4 
+## INFO  [10:45:05.264]          6     0.03704     0.01143 647d70bf-2ad8-4dd0-b6c3-4f8c1cfee1b6 
+## INFO  [10:45:05.265] Training 1 configs with budget of 16 for each 
+## INFO  [10:45:05.270] Evaluating 1 configuration(s) 
+## INFO  [10:45:05.466] Result of batch 5: 
+## INFO  [10:45:05.469]     eta booster nrounds bracket bracket_stage budget_scaled budget_real 
+## INFO  [10:45:05.469]  0.7853  gbtree      16       1             1            16          16 
+## INFO  [10:45:05.469]  n_configs classif.tpr classif.fpr                                uhash 
+## INFO  [10:45:05.469]          1      0.6543      0.2114 8a0efdec-b07d-4d43-a13e-a7389c3c65ac 
+## INFO  [10:45:05.471] Start evaluation of bracket 3 
+## INFO  [10:45:05.475] Training 3 configs with budget of 16 for each 
+## INFO  [10:45:05.477] Evaluating 3 configuration(s) 
+## INFO  [10:45:05.993] Result of batch 6: 
+## INFO  [10:45:05.996]     eta  booster nrounds bracket bracket_stage budget_scaled budget_real 
+## INFO  [10:45:05.996]  0.5221     dart      16       0             0            16          16 
+## INFO  [10:45:05.996]  0.1117   gbtree      16       0             0            16          16 
+## INFO  [10:45:05.996]  0.8860 gblinear      16       0             0            16          16 
+## INFO  [10:45:05.996]  n_configs classif.tpr classif.fpr                                uhash 
+## INFO  [10:45:05.996]          3      0.6420      0.2171 fa0e0775-be88-4ec8-bff0-dfca9298a0f0 
+## INFO  [10:45:05.996]          3      0.6543      0.1714 a8ef1481-cb5d-4d21-9fd3-637db4c10105 
+## INFO  [10:45:05.996]          3      0.4444      0.1543 bf0c012d-3c9e-42af-8601-ea5361963eef 
+## INFO  [10:45:06.004] Finished optimizing after 31 evaluation(s) 
+## INFO  [10:45:06.005] Result: 
+## INFO  [10:45:06.007]  nrounds    eta  booster learner_param_vals  x_domain classif.tpr classif.fpr 
+## INFO  [10:45:06.007]        1 0.2074 gblinear          &lt;list[4]&gt; &lt;list[3]&gt;     0.00000     0.00000 
+## INFO  [10:45:06.007]        1 0.4592   gbtree          &lt;list[4]&gt; &lt;list[3]&gt;     0.75309     0.25714 
+## INFO  [10:45:06.007]        1 0.2415 gblinear          &lt;list[4]&gt; &lt;list[3]&gt;     0.00000     0.00000 
+## INFO  [10:45:06.007]        1 0.1187   gbtree          &lt;list[4]&gt; &lt;list[3]&gt;     0.74074     0.24571 
+## INFO  [10:45:06.007]        1 0.9724   gbtree          &lt;list[4]&gt; &lt;list[3]&gt;     0.75309     0.25714 
+## INFO  [10:45:06.007]        1 0.4105 gblinear          &lt;list[4]&gt; &lt;list[3]&gt;     0.00000     0.00000 
+## INFO  [10:45:06.007]        1 0.4018     dart          &lt;list[4]&gt; &lt;list[3]&gt;     0.74074     0.24571 
+## INFO  [10:45:06.007]        1 0.9163 gblinear          &lt;list[4]&gt; &lt;list[3]&gt;     0.00000     0.00000 
+## INFO  [10:45:06.007]        1 0.5480 gblinear          &lt;list[4]&gt; &lt;list[3]&gt;     0.00000     0.00000 
+## INFO  [10:45:06.007]        1 0.7201 gblinear          &lt;list[4]&gt; &lt;list[3]&gt;     0.00000     0.00000 
+## INFO  [10:45:06.007]        4 0.4592   gbtree          &lt;list[4]&gt; &lt;list[3]&gt;     0.66667     0.18286 
+## INFO  [10:45:06.007]        4 0.1187   gbtree          &lt;list[4]&gt; &lt;list[3]&gt;     0.72840     0.22286 
+## INFO  [10:45:06.007]        4 0.5480 gblinear          &lt;list[4]&gt; &lt;list[3]&gt;     0.04938     0.02857 
+## INFO  [10:45:06.007]        4 0.7201 gblinear          &lt;list[4]&gt; &lt;list[3]&gt;     0.11111     0.05143 
+## INFO  [10:45:06.007]        4 0.1577 gblinear          &lt;list[4]&gt; &lt;list[3]&gt;     0.00000     0.00000 
+## INFO  [10:45:06.007]        4 0.5422     dart          &lt;list[4]&gt; &lt;list[3]&gt;     0.60494     0.15429 
+## INFO  [10:45:06.007]        4 0.4165 gblinear          &lt;list[4]&gt; &lt;list[3]&gt;     0.03704     0.01143 
+## INFO  [10:45:06.007]       16 0.1117   gbtree          &lt;list[4]&gt; &lt;list[3]&gt;     0.65432     0.17143</code></pre>
+<pre><code>##     nrounds    eta  booster learner_param_vals  x_domain classif.tpr
+##  1:       1 0.2074 gblinear          &lt;list[4]&gt; &lt;list[3]&gt;     0.00000
+##  2:       1 0.4592   gbtree          &lt;list[4]&gt; &lt;list[3]&gt;     0.75309
+##  3:       1 0.2415 gblinear          &lt;list[4]&gt; &lt;list[3]&gt;     0.00000
+##  4:       1 0.1187   gbtree          &lt;list[4]&gt; &lt;list[3]&gt;     0.74074
+##  5:       1 0.9724   gbtree          &lt;list[4]&gt; &lt;list[3]&gt;     0.75309
+##  6:       1 0.4105 gblinear          &lt;list[4]&gt; &lt;list[3]&gt;     0.00000
+##  7:       1 0.4018     dart          &lt;list[4]&gt; &lt;list[3]&gt;     0.74074
+##  8:       1 0.9163 gblinear          &lt;list[4]&gt; &lt;list[3]&gt;     0.00000
+##  9:       1 0.5480 gblinear          &lt;list[4]&gt; &lt;list[3]&gt;     0.00000
+## 10:       1 0.7201 gblinear          &lt;list[4]&gt; &lt;list[3]&gt;     0.00000
+## 11:       4 0.4592   gbtree          &lt;list[4]&gt; &lt;list[3]&gt;     0.66667
+## 12:       4 0.1187   gbtree          &lt;list[4]&gt; &lt;list[3]&gt;     0.72840
+## 13:       4 0.5480 gblinear          &lt;list[4]&gt; &lt;list[3]&gt;     0.04938
+## 14:       4 0.7201 gblinear          &lt;list[4]&gt; &lt;list[3]&gt;     0.11111
+## 15:       4 0.1577 gblinear          &lt;list[4]&gt; &lt;list[3]&gt;     0.00000
+## 16:       4 0.5422     dart          &lt;list[4]&gt; &lt;list[3]&gt;     0.60494
+## 17:       4 0.4165 gblinear          &lt;list[4]&gt; &lt;list[3]&gt;     0.03704
+## 18:      16 0.1117   gbtree          &lt;list[4]&gt; &lt;list[3]&gt;     0.65432
+##     classif.fpr
+##  1:     0.00000
+##  2:     0.25714
+##  3:     0.00000
+##  4:     0.24571
+##  5:     0.25714
+##  6:     0.00000
+##  7:     0.24571
+##  8:     0.00000
+##  9:     0.00000
+## 10:     0.00000
+## 11:     0.18286
+## 12:     0.22286
+## 13:     0.02857
+## 14:     0.05143
+## 15:     0.00000
+## 16:     0.15429
+## 17:     0.01143
+## 18:     0.17143</code></pre>
+<p>Now the result is not a single best configuration but an estimated Pareto front.
+All red points are not dominated by another parameter configuration regarding their <em>fpr</em> and <em>tpr</em> performance measures.</p>
+<div class="sourceCode" id="cb240"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb240-1"><a href="hyperband.html#cb240-1"></a>instance<span class="op">$</span>result</span></code></pre></div>
+<pre><code>##     nrounds    eta  booster learner_param_vals  x_domain classif.tpr
+##  1:       1 0.2074 gblinear          &lt;list[4]&gt; &lt;list[3]&gt;     0.00000
+##  2:       1 0.4592   gbtree          &lt;list[4]&gt; &lt;list[3]&gt;     0.75309
+##  3:       1 0.2415 gblinear          &lt;list[4]&gt; &lt;list[3]&gt;     0.00000
+##  4:       1 0.1187   gbtree          &lt;list[4]&gt; &lt;list[3]&gt;     0.74074
+##  5:       1 0.9724   gbtree          &lt;list[4]&gt; &lt;list[3]&gt;     0.75309
+##  6:       1 0.4105 gblinear          &lt;list[4]&gt; &lt;list[3]&gt;     0.00000
+##  7:       1 0.4018     dart          &lt;list[4]&gt; &lt;list[3]&gt;     0.74074
+##  8:       1 0.9163 gblinear          &lt;list[4]&gt; &lt;list[3]&gt;     0.00000
+##  9:       1 0.5480 gblinear          &lt;list[4]&gt; &lt;list[3]&gt;     0.00000
+## 10:       1 0.7201 gblinear          &lt;list[4]&gt; &lt;list[3]&gt;     0.00000
+## 11:       4 0.4592   gbtree          &lt;list[4]&gt; &lt;list[3]&gt;     0.66667
+## 12:       4 0.1187   gbtree          &lt;list[4]&gt; &lt;list[3]&gt;     0.72840
+## 13:       4 0.5480 gblinear          &lt;list[4]&gt; &lt;list[3]&gt;     0.04938
+## 14:       4 0.7201 gblinear          &lt;list[4]&gt; &lt;list[3]&gt;     0.11111
+## 15:       4 0.1577 gblinear          &lt;list[4]&gt; &lt;list[3]&gt;     0.00000
+## 16:       4 0.5422     dart          &lt;list[4]&gt; &lt;list[3]&gt;     0.60494
+## 17:       4 0.4165 gblinear          &lt;list[4]&gt; &lt;list[3]&gt;     0.03704
+## 18:      16 0.1117   gbtree          &lt;list[4]&gt; &lt;list[3]&gt;     0.65432
+##     classif.fpr
+##  1:     0.00000
+##  2:     0.25714
+##  3:     0.00000
+##  4:     0.24571
+##  5:     0.25714
+##  6:     0.00000
+##  7:     0.24571
+##  8:     0.00000
+##  9:     0.00000
+## 10:     0.00000
+## 11:     0.18286
+## 12:     0.22286
+## 13:     0.02857
+## 14:     0.05143
+## 15:     0.00000
+## 16:     0.15429
+## 17:     0.01143
+## 18:     0.17143</code></pre>
+<div class="sourceCode" id="cb242"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb242-1"><a href="hyperband.html#cb242-1"></a><span class="kw">plot</span>(classif.tpr<span class="op">~</span>classif.fpr, instance<span class="op">$</span>archive<span class="op">$</span><span class="kw">data</span>())</span>
+<span id="cb242-2"><a href="hyperband.html#cb242-2"></a><span class="kw">points</span>(classif.tpr<span class="op">~</span>classif.fpr, instance<span class="op">$</span>result, <span class="dt">col =</span> <span class="st">&quot;red&quot;</span>)</span></code></pre></div>
+<p><img src="03-optimization-hyperband_files/figure-html/03-optimization-hyperband-013-1.svg" width="672" style="display: block; margin: auto;" /></p>
+
+</div>
+<h3>References</h3>
+<div id="refs" class="references">
+<div id="ref-Li2016">
+<p>Li, Lisha, Kevin G. Jamieson, Giulia DeSalvo, Afshin Rostamizadeh, and Ameet Talwalkar. 2016. “Efficient Hyperparameter Optimization and Infinitely Many Armed Bandits.” <em>CoRR</em> abs/1603.06560. <a href="http://arxiv.org/abs/1603.06560">http://arxiv.org/abs/1603.06560</a>.</p>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="nested-resampling.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="fs.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": true,
+"facebook": false,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/mlr-org/mlr3book/edit/master/bookdown/03-optimization-hyperband.Rmd",
+"text": "Edit this chapter"
+},
+"history": {
+"link": "https://github.com/mlr-org/mlr3book/commits/master/03-optimization-hyperband.Rmd",
+"text": "Edit history"
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": [["mlr3book.pdf", "PDF"]],
+"toc": {
+"collapse": "section"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>
